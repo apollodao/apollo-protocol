@@ -31,7 +31,7 @@ pub fn remove_dex(storage: &mut dyn Storage, dex_id: u8) -> StdResult<()> {
 pub fn get_apollo_dex_adaptor_by_addr(
     storage: &dyn Storage,
     dex_adaptor_addr: &Addr,
-) -> StdResult<Record<Addr>> {
+) -> StdResult<Addr> {
     match APOLLO_DEX_ADAPTORS
         .range(storage, None, None, Order::Ascending)
         .find(|p| &p.as_ref().unwrap().1 == dex_adaptor_addr)
@@ -40,7 +40,7 @@ pub fn get_apollo_dex_adaptor_by_addr(
             "dex adaptor not whitelisted with factory - {:?}",
             dex_adaptor_addr
         ))),
-        Some(found) => found,
+        Some(found) => Ok(found?.1),
     }
 }
 

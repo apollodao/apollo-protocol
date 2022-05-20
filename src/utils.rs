@@ -2,11 +2,11 @@ use apollo_asset::asset::AssetInfo;
 use cosmwasm_std::{
     to_binary, Addr, Api, Binary, CanonicalAddr, Coin, CosmosMsg, Decimal, Decimal256, Deps,
     DepsMut, Env, Event, Fraction, MessageInfo, QuerierWrapper, QueryRequest, Response, StdError,
-    StdResult, Uint128, WasmMsg, WasmQuery,
+    StdResult, Uint128, Uint256, WasmMsg, WasmQuery,
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
 use osmo_bindings::{OsmosisQuery, Swap, SwapAmount};
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 
 pub fn only_allow_human_addr(message_info: &MessageInfo, address: &str) -> StdResult<()> {
     if address != message_info.sender {
@@ -126,66 +126,66 @@ pub fn simulate_routed_swap(
     }))
 }
 
-pub fn create_routed_swap_msg(
-    querier: &QuerierWrapper,
-    from: AssetInfo,
-    to: AssetInfo,
-    amount: Uint128,
-    max_slippage: Decimal,
-    terraswap_router: Addr,
-) -> StdResult<CosmosMsg> {
-    let estimated_tokens_per_base = simulate_routed_swap(
-        querier,
-        from.clone(),
-        to.clone(),
-        amount,
-        terraswap_router.clone(),
-    )?;
-    println!("cat1");
-    let minimum_recieve = amount
-        * decimal_multiplication(
-            Decimal::from_ratio(estimated_tokens_per_base, 1000000u128),
-            Decimal::from_ratio(1u128, 1u128) - max_slippage,
-        );
+// pub fn create_routed_swap_msg(
+//     querier: &QuerierWrapper,
+//     from: AssetInfo,
+//     to: AssetInfo,
+//     amount: Uint128,
+//     max_slippage: Decimal,
+//     terraswap_router: Addr,
+// ) -> StdResult<CosmosMsg> {
+//     let estimated_tokens_per_base = simulate_routed_swap(
+//         querier,
+//         from.clone(),
+//         to.clone(),
+//         amount,
+//         terraswap_router.clone(),
+//     )?;
+//     println!("cat1");
+//     let minimum_recieve = amount
+//         * decimal_multiplication(
+//             Decimal::from_ratio(estimated_tokens_per_base, 1000000u128),
+//             Decimal::from_ratio(1u128, 1u128) - max_slippage,
+//         );
 
-    println!("minimum_recieve = {}", minimum_recieve);
-    println!("est_price = {}", estimated_tokens_per_base);
-    println!("max_slippage = {}", max_slippage);
+//     println!("minimum_recieve = {}", minimum_recieve);
+//     println!("est_price = {}", estimated_tokens_per_base);
+//     println!("max_slippage = {}", max_slippage);
 
-    match from {
-        AssetInfo::NativeToken { denom } => Ok(CosmosMsg::Wasm(WasmMsg::Execute {
-            contract_addr: terraswap_router.to_string(),
-            msg: to_binary(&RouterCw20HookMsg::ExecuteSwapOperations {
-                operations: vec![SwapOperation::TerraSwap {
-                    offer_asset_info: AssetInfo::NativeToken {
-                        denom: denom.clone(),
-                    },
-                    ask_asset_info: to,
-                }],
-                minimum_receive: Some(minimum_recieve),
-                to: None,
-            })?,
-            funds: vec![Coin { amount, denom }],
-        })),
-        AssetInfo::Token { contract_addr } => Ok(CosmosMsg::Wasm(WasmMsg::Execute {
-            contract_addr: contract_addr.to_string(),
-            msg: to_binary(&Cw20ExecuteMsg::Send {
-                amount,
-                contract: terraswap_router.to_string(),
-                msg: to_binary(&RouterCw20HookMsg::ExecuteSwapOperations {
-                    operations: vec![SwapOperation::TerraSwap {
-                        offer_asset_info: AssetInfo::Token { contract_addr },
-                        ask_asset_info: to,
-                    }],
-                    minimum_receive: Some(minimum_recieve),
-                    to: None,
-                })?,
-            })
-            .unwrap(),
-            funds: vec![],
-        })),
-    }
-}
+//     match from {
+//         AssetInfo::NativeToken { denom } => Ok(CosmosMsg::Wasm(WasmMsg::Execute {
+//             contract_addr: terraswap_router.to_string(),
+//             msg: to_binary(&RouterCw20HookMsg::ExecuteSwapOperations {
+//                 operations: vec![SwapOperation::TerraSwap {
+//                     offer_asset_info: AssetInfo::NativeToken {
+//                         denom: denom.clone(),
+//                     },
+//                     ask_asset_info: to,
+//                 }],
+//                 minimum_receive: Some(minimum_recieve),
+//                 to: None,
+//             })?,
+//             funds: vec![Coin { amount, denom }],
+//         })),
+//         AssetInfo::Token { contract_addr } => Ok(CosmosMsg::Wasm(WasmMsg::Execute {
+//             contract_addr: contract_addr.to_string(),
+//             msg: to_binary(&Cw20ExecuteMsg::Send {
+//                 amount,
+//                 contract: terraswap_router.to_string(),
+//                 msg: to_binary(&RouterCw20HookMsg::ExecuteSwapOperations {
+//                     operations: vec![SwapOperation::TerraSwap {
+//                         offer_asset_info: AssetInfo::Token { contract_addr },
+//                         ask_asset_info: to,
+//                     }],
+//                     minimum_receive: Some(minimum_recieve),
+//                     to: None,
+//                 })?,
+//             })
+//             .unwrap(),
+//             funds: vec![],
+//         })),
+//     }
+// }
 
 pub fn calculate_user_bonds(
     shares: Uint128,
@@ -195,70 +195,71 @@ pub fn calculate_user_bonds(
     if total_shares.is_zero() {
         return Ok(Uint128::zero());
     }
-    Ok((Decimal256::from_uint256(total_bond_amount)
-        * Decimal256::from_ratio(shares.u128(), total_shares.u128()))
-    .round()
-    .into())
+    Ok(Uint128::try_from(
+        (Decimal256::raw(total_bond_amount.u128())
+            * Decimal256::from_ratio(shares.u128(), total_shares.u128()))
+        .atomics(),
+    )?)
 }
 
-// generate swap messages for sending all sent funds to denom
-pub fn swap_funds_for(
-    querier: &QuerierWrapper,
-    env: &Env,
-    funds: &Vec<Coin>,
-    denom: &str,
-) -> StdResult<Vec<AstroSwapOperation>> {
-    let operations = funds
-        .iter()
-        .filter(|f| {
-            f.denom != denom
-                && (!f.amount.is_zero()
-                    || !AstroAssetInfo::NativeToken {
-                        denom: f.denom.to_string(),
-                    }
-                    .query_pool(querier, env.contract.address.clone())
-                    .unwrap_or(Uint128::zero())
-                    .is_zero())
-        })
-        .map(|f| AstroSwapOperation::NativeSwap {
-            offer_denom: f.denom.to_string(),
-            ask_denom: denom.to_string(),
-        })
-        .collect::<Vec<AstroSwapOperation>>();
-    let denom_balance = AstroAssetInfo::NativeToken {
-        denom: denom.to_string(),
-    }
-    .query_pool(querier, env.contract.address.clone())
-    .unwrap_or(Uint128::zero());
-    if denom_balance.is_zero() && operations.len() == 0 {
-        return Err(StdError::generic_err("no funds provided to swap"));
-    }
-    Ok(operations)
-}
+// // generate swap messages for sending all sent funds to denom
+// pub fn swap_funds_for(
+//     querier: &QuerierWrapper,
+//     env: &Env,
+//     funds: &Vec<Coin>,
+//     denom: &str,
+// ) -> StdResult<Vec<AstroSwapOperation>> {
+//     let operations = funds
+//         .iter()
+//         .filter(|f| {
+//             f.denom != denom
+//                 && (!f.amount.is_zero()
+//                     || !AstroAssetInfo::NativeToken {
+//                         denom: f.denom.to_string(),
+//                     }
+//                     .query_pool(querier, env.contract.address.clone())
+//                     .unwrap_or(Uint128::zero())
+//                     .is_zero())
+//         })
+//         .map(|f| AstroSwapOperation::NativeSwap {
+//             offer_denom: f.denom.to_string(),
+//             ask_denom: denom.to_string(),
+//         })
+//         .collect::<Vec<AstroSwapOperation>>();
+//     let denom_balance = AstroAssetInfo::NativeToken {
+//         denom: denom.to_string(),
+//     }
+//     .query_pool(querier, env.contract.address.clone())
+//     .unwrap_or(Uint128::zero());
+//     if denom_balance.is_zero() && operations.len() == 0 {
+//         return Err(StdError::generic_err("no funds provided to swap"));
+//     }
+//     Ok(operations)
+// }
 
-pub fn calculate_minimum_receive(
-    querier: &QuerierWrapper,
-    dex_router: &Addr,
-    offer_amount: Uint128,
-    operations: &Vec<AstroSwapOperation>,
-    max_spread: Option<Decimal>,
-) -> StdResult<Option<Uint128>> {
-    let minimum_receive = match max_spread {
-        Some(max_spread) => {
-            let simulation_response: SimulateSwapOperationsResponse =
-                querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
-                    contract_addr: dex_router.to_string(),
-                    msg: to_binary(&AstroRouterQueryMsg::SimulateSwapOperations {
-                        offer_amount,
-                        operations: operations.clone(),
-                    })?,
-                }))?;
-            Some((Decimal::one() - max_spread) * simulation_response.amount)
-        }
-        None => None,
-    };
-    Ok(minimum_receive)
-}
+// pub fn calculate_minimum_receive(
+//     querier: &QuerierWrapper,
+//     dex_router: &Addr,
+//     offer_amount: Uint128,
+//     operations: &Vec<AstroSwapOperation>,
+//     max_spread: Option<Decimal>,
+// ) -> StdResult<Option<Uint128>> {
+//     let minimum_receive = match max_spread {
+//         Some(max_spread) => {
+//             let simulation_response: SimulateSwapOperationsResponse =
+//                 querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
+//                     contract_addr: dex_router.to_string(),
+//                     msg: to_binary(&AstroRouterQueryMsg::SimulateSwapOperations {
+//                         offer_amount,
+//                         operations: operations.clone(),
+//                     })?,
+//                 }))?;
+//             Some((Decimal::one() - max_spread) * simulation_response.amount)
+//         }
+//         None => None,
+//     };
+//     Ok(minimum_receive)
+// }
 
 pub fn query_token_balance(
     querier: &QuerierWrapper,
