@@ -24,35 +24,35 @@ pub fn get_edges(storage: &dyn Storage, node: &Node) -> Vec<Edge> {
     GRAPH.load(storage, node).unwrap_or_default()
 }
 
-// settings for pagination
-const MAX_LIMIT: u32 = 30;
-const DEFAULT_LIMIT: u32 = 10;
-pub fn get_all_edges(
-    storage: &dyn Storage,
-    limit: Option<u32>,
-    start_after: Option<AssetInfo>,
-) -> StdResult<Vec<PairsResponseItem>> {
-    let t = if let Some(start_after) = start_after {
-        Some(to_binary(&Node::from(start_after))?)
-    } else {
-        None
-    };
-    let start = t.map(Bound::exclusive);
-    let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
+// // settings for pagination
+// const MAX_LIMIT: u32 = 30;
+// const DEFAULT_LIMIT: u32 = 10;
+// pub fn get_all_edges(
+//     storage: &dyn Storage,
+//     limit: Option<u32>,
+//     start_after: Option<AssetInfo>,
+// ) -> StdResult<Vec<PairsResponseItem>> {
+//     let t = if let Some(start_after) = start_after {
+//         Some(to_binary(&Node::from(start_after))?)
+//     } else {
+//         None
+//     };
+//     let start = t.map(Bound::exclusive);
+//     let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
 
-    GRAPH
-        .range(storage, start, None, Order::Ascending)
-        .take(limit)
-        .map(|p| {
-            let edges = p?.1;
-            let node = &edges[0].from;
-            Ok(PairsResponseItem {
-                asset: node.asset.clone(),
-                pairs: edges,
-            })
-        })
-        .collect()
-}
+//     GRAPH
+//         .range(storage, start, None, Order::Ascending)
+//         .take(limit)
+//         .map(|p| {
+//             let edges = p?.1;
+//             let node = &edges[0].from;
+//             Ok(PairsResponseItem {
+//                 asset: node.asset.clone(),
+//                 pairs: edges,
+//             })
+//         })
+//         .collect()
+// }
 
 pub fn add_edge(storage: &mut dyn Storage, edge: &Edge) -> StdResult<()> {
     let mut edges = get_edges(storage, &edge.from);
