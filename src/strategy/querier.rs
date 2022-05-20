@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use cosmwasm_std::{
     to_binary, Addr, Deps, Env, QueryRequest, StdResult, Uint128, Uint256, WasmQuery,
 };
@@ -96,7 +98,9 @@ pub fn query_tvl(deps: Deps, env: Env) -> StdResult<TvlResponse> {
 
     let tvl = Uint256::from(amount) * asset_token_price;
 
-    Ok(TvlResponse { tvl: tvl.into() })
+    Ok(TvlResponse {
+        tvl: Uint128::try_from(tvl)?,
+    })
 }
 
 pub fn query_apr(deps: Deps) -> StdResult<AprResponse> {
