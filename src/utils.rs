@@ -5,6 +5,7 @@ use cosmwasm_std::{
     StdResult, Uint128, WasmMsg, WasmQuery,
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
+use osmo_bindings::{OsmosisQuery, Swap, SwapAmount};
 use std::convert::TryInto;
 
 pub fn only_allow_human_addr(message_info: &MessageInfo, address: &str) -> StdResult<()> {
@@ -105,20 +106,21 @@ pub fn round_half_to_even_128(a: Decimal) -> Uint128 {
 
 pub fn simulate_routed_swap(
     querier: &QuerierWrapper,
-    from: AssetInfo,
-    to: AssetInfo,
+    from: String,
+    to: String,
     amount: Uint128,
-    terraswap_router: Addr,
+    osmosis_router: Addr,
+    self_address: Addr,
+    pool_id: u64,
 ) -> StdResult<Uint128> {
     println!("dog1 = {}", amount);
     querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
-        contract_addr: terraswap_router.to_string(),
-        msg: to_binary(&RouterQueryMsg::SimulateSwapOperations {
-            offer_amount: amount,
-            operations: vec![SwapOperation::TerraSwap {
-                offer_asset_info: from,
-                ask_asset_info: to,
-            }],
+        contract_addr: osmosis_router.to_string(),
+        msg: to_binary(&OsmosisQuery::EstimateSwap {
+            sender: self_address.to_string(),
+            first: Swap::new(pool_id, from, to),
+            route: vec![],
+            amount: SwapAmount::In(amount),
         })
         .unwrap(),
     }))

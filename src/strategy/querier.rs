@@ -1,6 +1,6 @@
-use astroport::querier::query_token_balance;
-use cosmwasm_bignumber::Uint256;
-use cosmwasm_std::{to_binary, Addr, Deps, Env, QueryRequest, StdResult, Uint128, WasmQuery};
+use cosmwasm_std::{
+    to_binary, Addr, Deps, Env, QueryRequest, StdResult, Uint128, Uint256, WasmQuery,
+};
 
 use super::{
     msg::{AprResponse, ShouldExecuteResponse, StrategyInfo, TvlResponse, UserInfo},
@@ -10,7 +10,7 @@ use super::{
 use crate::{
     adaptor::{AdaptorQueryMsg, StakingAdaptorQueryMsg},
     oracle::query_oracle_price,
-    utils::calculate_user_bonds,
+    utils::{calculate_user_bonds, query_token_balance},
 };
 use crate::{
     querier::query_cw20_token_info,

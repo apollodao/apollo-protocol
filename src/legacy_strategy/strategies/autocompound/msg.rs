@@ -1,10 +1,10 @@
 use crate::legacy_strategy::msg::StrategyConfigOptions;
 use crate::legacy_vault::msg::VaultExecuteMsg;
+use apollo_asset::asset::AssetInfo;
 use cosmwasm_std::{Addr, CanonicalAddr, Decimal, Uint128};
 use cw20::Cw20ReceiveMsg;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use terraswap::asset::AssetInfo;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
