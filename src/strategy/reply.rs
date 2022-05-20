@@ -1,6 +1,6 @@
 use cosmwasm_std::{
     attr, Addr, ContractResult, Deps, DepsMut, Env, Event, Reply, Response, StdError, StdResult,
-    Storage, SubMsgExecutionResponse,
+    Storage, SubMsgExecutionResponse, SubMsgResponse, SubMsgResult,
 };
 
 use crate::utils::parse_contract_addr_from_instantiate_event;
@@ -19,22 +19,22 @@ pub const REPLY_STRATEGY_EXECUTE_GRACE_FAIL: u64 = 1;
 pub fn base_strategy_reply(deps: DepsMut, _env: Env, msg: Reply) -> StdResult<Response> {
     match msg.id {
         REPLY_SAVE_STRATEGY_TOKEN_ADDR => match msg.result {
-            ContractResult::Ok(subcall) => {
+            SubMsgResult::Ok(subcall) => {
                 reply_save_addr(deps, subcall, |s, addr| STRATEGY_TOKEN.save(s, &addr))
             }
-            ContractResult::Err(_) => Err(StdError::generic_err(
+            SubMsgResult::Err(_) => Err(StdError::generic_err(
                 "Failed to initialize strategy token.",
             )),
         },
         REPLY_STRATEGY_EXECUTE_GRACE_FAIL => match msg.result {
-            ContractResult::Err(e) => {
+            SubMsgResult::Err(e) => {
                 if e.contains("not optimal to execute") {
                     Ok(Response::new().add_attribute("autocompound", e))
                 } else {
                     Err(StdError::generic_err(e))
                 }
             }
-            ContractResult::Ok(_) => Err(StdError::generic_err(
+            SubMsgResult::Ok(_) => Err(StdError::generic_err(
                 "unexpected - should not be called on success",
             )),
         },
@@ -48,7 +48,7 @@ pub fn base_strategy_reply(deps: DepsMut, _env: Env, msg: Reply) -> StdResult<Re
  */
 pub fn reply_save_addr(
     deps: DepsMut,
-    subcall: SubMsgExecutionResponse,
+    subcall: SubMsgResponse,
     save_addr: fn(&mut dyn Storage, Addr) -> StdResult<()>,
 ) -> StdResult<Response> {
     let addr = parse_contract_addr_from_instantiate_event(deps.as_ref(), subcall.events)?;
