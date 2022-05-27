@@ -13,7 +13,7 @@ cw20-base = { version = "0.13.2" }
 osmo-bindings = "0.5.1"
 cw-storage-plus = "0.13.2"
 cosmwasm-storage = "1.0.0"
-apollo-asset = { git = "ssh://git@github.com/apollodao/apollo-asset.git", tag = "v0.1.0" }
+apollo-asset = { git = "ssh://git@github.com/apollodao/apollo-asset.git", tag = "v0.2.0" }
 
 [dev-dependencies]
 cosmwasm-schema = { version = "1.0.0" }
