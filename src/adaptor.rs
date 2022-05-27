@@ -48,12 +48,12 @@ pub enum StakingAdaptorExecuteMsg<A = ()> {
     Adaptor(A),
 }
 
-pub type DexAdaptorQueryMsg = BaseDexAdaptorQueryMsg<()>;
+pub type DexAdaptorQueryMsg = BaseDexAdaptorQueryMsg<(), ()>;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
-pub enum BaseDexAdaptorQueryMsg<A = ()> {
+pub enum BaseDexAdaptorQueryMsg<A = (), B = ()> {
     /// query dex factory address
     Factory {},
     // TODO: Move SimulateSwap to router?
@@ -75,6 +75,7 @@ pub enum BaseDexAdaptorQueryMsg<A = ()> {
         amount: Uint128,
         max_spread: Option<Decimal>,
         recipient: Option<String>,
+        options: B
     },
     Adaptor(A),
 }
@@ -175,9 +176,9 @@ pub type AdaptorQueryMsg = BaseAdaptorQueryMsg<(), ()>;
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
-pub enum BaseAdaptorQueryMsg<D = (), S = ()> {
-    Dex(BaseDexAdaptorQueryMsg<D>),
-    Staking(BaseStakingAdaptorQueryMsg<S>),
+pub enum BaseAdaptorQueryMsg<D = BaseDexAdaptorQueryMsg<(), ()>, S = BaseStakingAdaptorQueryMsg<()>> {
+    Dex(D),
+    Staking(S),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
