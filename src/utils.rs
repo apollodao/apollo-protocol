@@ -2,7 +2,7 @@ use apollo_asset::asset::AssetInfo;
 use cosmwasm_std::{
     to_binary, Addr, Api, Binary, CanonicalAddr, Coin, CosmosMsg, Decimal, Decimal256, Deps,
     DepsMut, Env, Event, Fraction, MessageInfo, QuerierWrapper, QueryRequest, Response, StdError,
-    StdResult, Uint128, Uint256, WasmMsg, WasmQuery,
+    StdResult, Uint128, WasmMsg, WasmQuery,
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
 use osmo_bindings::{OsmosisQuery, Swap, SwapAmount};
@@ -345,4 +345,10 @@ pub fn parse_contract_addr_from_instantiate_event(
             .unwrap()
             .value,
     )?)
+}
+
+pub fn decimal256_to_decimal(decimal: Decimal256) -> StdResult<Decimal> {
+    let atomics: Uint128 = decimal.atomics().try_into()?;
+    Ok(Decimal::from_atomics(atomics, decimal.decimal_places())
+        .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
 }
