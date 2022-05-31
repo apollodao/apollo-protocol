@@ -113,9 +113,9 @@ pub fn round_half_to_even_256(a: Decimal256) -> Uint256 {
 
     //Round up if remainder is > 0.5 or if remainder is exactly 0.5 and truncated is odd
     //Else, round down
-    if (remainder == fraction_unit / Uint256::new(2)
-        && (numerator / fraction_unit) % Uint256::new(2) != Uint256::zero())
-        || remainder > fraction_unit / Uint256::new(2)
+    if (remainder == fraction_unit / Uint256::from_u128(2u128)
+        && (numerator / fraction_unit) % Uint256::from_u128(2u128) != Uint256::zero())
+        || remainder > fraction_unit / Uint256::from_u128(2u128)
     {
         //round up
         result = (truncated + fraction_unit) / fraction_unit;
