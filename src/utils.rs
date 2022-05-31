@@ -2,7 +2,7 @@ use apollo_asset::asset::AssetInfo;
 use cosmwasm_std::{
     to_binary, Addr, Api, Binary, CanonicalAddr, Coin, CosmosMsg, Decimal, Decimal256, Deps,
     DepsMut, Env, Event, Fraction, MessageInfo, QuerierWrapper, QueryRequest, Response, StdError,
-    StdResult, Uint128, WasmMsg, WasmQuery,
+    StdResult, Uint128, Uint256, WasmMsg, WasmQuery,
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
 use osmo_bindings::{OsmosisQuery, Swap, SwapAmount};
@@ -93,6 +93,29 @@ pub fn round_half_to_even_128(a: Decimal) -> Uint128 {
     if (remainder == fraction_unit / Uint128::new(2)
         && (numerator / fraction_unit) % Uint128::new(2) != Uint128::zero())
         || remainder > fraction_unit / Uint128::new(2)
+    {
+        //round up
+        result = (truncated + fraction_unit) / fraction_unit;
+    } else {
+        //round down
+        result = truncated / fraction_unit;
+    }
+
+    result
+}
+
+pub fn round_half_to_even_256(a: Decimal256) -> Uint256 {
+    let numerator = a.numerator();
+    let fraction_unit = Decimal256::one().numerator();
+    let truncated = (numerator / fraction_unit) * fraction_unit;
+    let remainder = numerator - truncated;
+    let result;
+
+    //Round up if remainder is > 0.5 or if remainder is exactly 0.5 and truncated is odd
+    //Else, round down
+    if (remainder == fraction_unit / Uint256::new(2)
+        && (numerator / fraction_unit) % Uint256::new(2) != Uint256::zero())
+        || remainder > fraction_unit / Uint256::new(2)
     {
         //round up
         result = (truncated + fraction_unit) / fraction_unit;
