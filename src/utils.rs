@@ -375,3 +375,9 @@ pub fn decimal256_to_decimal(decimal: Decimal256) -> StdResult<Decimal> {
     Ok(Decimal::from_atomics(atomics, decimal.decimal_places())
         .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
 }
+
+pub fn decimal_to_decimal256(decimal: Decimal) -> StdResult<Decimal256> {
+    let atomics: Uint128 = decimal.atomics();
+    Ok(Decimal256::from_atomics(atomics, decimal.decimal_places())
+        .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
+}
