@@ -5,7 +5,6 @@ use cosmwasm_std::{
     StdResult, Uint128, Uint256, WasmMsg, WasmQuery,
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
-use osmo_bindings::{OsmosisQuery, Swap, SwapAmount};
 use std::convert::{TryFrom, TryInto};
 
 pub fn only_allow_human_addr(message_info: &MessageInfo, address: &str) -> StdResult<()> {
@@ -127,27 +126,27 @@ pub fn round_half_to_even_256(a: Decimal256) -> Uint256 {
     result
 }
 
-pub fn simulate_routed_swap(
-    querier: &QuerierWrapper,
-    from: String,
-    to: String,
-    amount: Uint128,
-    osmosis_router: Addr,
-    self_address: Addr,
-    pool_id: u64,
-) -> StdResult<Uint128> {
-    println!("dog1 = {}", amount);
-    querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
-        contract_addr: osmosis_router.to_string(),
-        msg: to_binary(&OsmosisQuery::EstimateSwap {
-            sender: self_address.to_string(),
-            first: Swap::new(pool_id, from, to),
-            route: vec![],
-            amount: SwapAmount::In(amount),
-        })
-        .unwrap(),
-    }))
-}
+// pub fn simulate_routed_swap(
+//     querier: &QuerierWrapper,
+//     from: String,
+//     to: String,
+//     amount: Uint128,
+//     osmosis_router: Addr,
+//     self_address: Addr,
+//     pool_id: u64,
+// ) -> StdResult<Uint128> {
+//     println!("dog1 = {}", amount);
+//     querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
+//         contract_addr: osmosis_router.to_string(),
+//         msg: to_binary(&OsmosisQuery::EstimateSwap {
+//             sender: self_address.to_string(),
+//             first: Swap::new(pool_id, from, to),
+//             route: vec![],
+//             amount: SwapAmount::In(amount),
+//         })
+//         .unwrap(),
+//     }))
+// }
 
 // pub fn create_routed_swap_msg(
 //     querier: &QuerierWrapper,
