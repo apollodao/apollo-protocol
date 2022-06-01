@@ -5,13 +5,18 @@ use cw20::Cw20ReceiveMsg;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-pub type AdaptorExecuteMsg = BaseAdaptorExecuteMsg<BaseDexAdaptorExecuteMsg<()>, BaseStakingAdaptorExecuteMsg<()>>;
-pub type AdaptorQueryMsg = BaseAdaptorQueryMsg<BaseDexAdaptorQueryMsg<()>, BaseStakingAdaptorQueryMsg<()>>;
+pub type AdaptorExecuteMsg =
+    BaseAdaptorExecuteMsg<BaseDexAdaptorExecuteMsg<()>, BaseStakingAdaptorExecuteMsg<()>>;
+pub type AdaptorQueryMsg =
+    BaseAdaptorQueryMsg<BaseDexAdaptorQueryMsg<()>, BaseStakingAdaptorQueryMsg<()>>;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
-pub enum BaseAdaptorExecuteMsg<D = BaseDexAdaptorExecuteMsg<(), ()>, S = BaseStakingAdaptorExecuteMsg<()>> {
+pub enum BaseAdaptorExecuteMsg<
+    D = BaseDexAdaptorExecuteMsg<(), ()>,
+    S = BaseStakingAdaptorExecuteMsg<()>,
+> {
     Receive(Cw20ReceiveMsg),
     Dex(D),
     Staking(S),
@@ -44,14 +49,14 @@ pub enum BaseDexAdaptorExecuteMsg<C = (), P = ()> {
         recipient: Option<Addr>,
     },
     SendTokens {
-        token: Addr,
+        token: AssetInfo,
         recipient: Addr,
         amount: Option<Uint128>,
         hook_msg: Option<Binary>,
     },
     AddPair {
         asset_infos: [AssetInfo; 2],
-        pair_info: P
+        pair_info: P,
     },
     Callback(C),
 }
@@ -94,7 +99,7 @@ pub enum BaseDexAdaptorQueryMsg<A = ()> {
         amount: Uint128,
     },
     Reserves {
-        asset_infos: [AssetInfo; 2]
+        asset_infos: [AssetInfo; 2],
     },
     Balance {
         asset: AssetInfo,
@@ -108,7 +113,8 @@ pub enum BaseDexAdaptorQueryMsg<A = ()> {
         to: AssetInfo,
         amount: Uint128,
         max_spread: Option<Decimal>,
-        recipient: Option<String>
+        recipient: Option<String>,
+        hook_msg: Option<Binary>,
     },
     Adaptor(A),
 }
@@ -174,7 +180,7 @@ pub struct AprResponse {
 #[schemars(deny_unknown_fields)]
 pub struct PairInfo<I = ()> {
     pub pair_type: PairType,
-    pub pair_info: I
+    pub pair_info: I,
 }
 
 // TODO - might be able to remove below, but keeping for now in case we can reuse

@@ -9,6 +9,9 @@ use super::{
     state::{BASE_TOKEN, ORACLE, STAKING_ADAPTOR, STRATEGY_TOKEN},
 };
 
+use crate::adaptor::msg::{
+    AdaptorExecuteMsg, AdaptorQueryMsg, BaseAdaptorQueryMsg, BaseStakingAdaptorQueryMsg,
+};
 use crate::{
     oracle::query_oracle_price,
     utils::{calculate_user_bonds, query_token_balance},
@@ -17,17 +20,18 @@ use crate::{
     querier::query_cw20_token_info,
     strategy::state::{BaseConfig, BASE_DENOM, FACTORY},
 };
-use crate::adaptor::{AdaptorExecuteMsg, AdaptorQueryMsg, BaseAdaptorQueryMsg, BaseStakingAdaptorQueryMsg};
 
 pub fn query_total_bond_amount(deps: Deps, env: &Env, token: Option<Addr>) -> StdResult<Uint128> {
     let adaptor_addr = STAKING_ADAPTOR.load(deps.storage)?;
 
     deps.querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
         contract_addr: adaptor_addr.to_string(),
-        msg: to_binary(&AdaptorQueryMsg::Staking(BaseStakingAdaptorQueryMsg::TotalBondAmount {
-            token,
-            staker_addr: Some(env.contract.address.clone()),
-        }))?,
+        msg: to_binary(&AdaptorQueryMsg::Staking(
+            BaseStakingAdaptorQueryMsg::TotalBondAmount {
+                token,
+                staker_addr: Some(env.contract.address.clone()),
+            },
+        ))?,
     }))
 }
 
@@ -90,10 +94,12 @@ pub fn query_tvl(deps: Deps, env: Env) -> StdResult<TvlResponse> {
     // Query the proxy contract for the total bond amount
     let amount: Uint128 = deps.querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
         contract_addr: proxy_addr.to_string(),
-        msg: to_binary(&AdaptorQueryMsg::Staking(BaseStakingAdaptorQueryMsg::TotalBondAmount {
-            staker_addr: None,
-            token: None,
-        }))?,
+        msg: to_binary(&AdaptorQueryMsg::Staking(
+            BaseStakingAdaptorQueryMsg::TotalBondAmount {
+                staker_addr: None,
+                token: None,
+            },
+        ))?,
     }))?;
 
     let tvl = Uint256::from(amount) * asset_token_price;

@@ -307,18 +307,18 @@ pub fn execute_send_tokens(
     deps: DepsMut,
     env: Env,
     info: MessageInfo,
-    token: Addr,
+    token: AssetInfo,
     amount: Option<Uint128>,
     recipient: Addr,
     hook_msg: Option<Binary>,
 ) -> StdResult<Response> {
     only_allow_human_addr(&info, env.contract.address.as_str())?;
 
-    let amount = amount.unwrap_or(query_token_balance(
-        &deps.querier,
-        token.clone(),
-        env.contract.address.clone(),
-    )?);
+    let amount = amount.unwrap_or_else(|| {
+        token
+            .query_balance(&deps.querier, env.contract.address.clone())
+            .unwrap_or_default()
+    });
     let send = match hook_msg {
         Some(cw20_hook_msg) => CosmosMsg::Wasm(WasmMsg::Execute {
             contract_addr: token.to_string(),
