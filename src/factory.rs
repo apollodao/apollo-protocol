@@ -207,10 +207,6 @@ pub struct GetStrategiesResponse {
 pub struct FactoryUserInfoResponse {
     pub id: u64,
     pub base_token_balance: Uint128,
-    pub pending_reward: Uint128,
-    pub extension_pending_reward: Uint128,
-    pub reward_index: Decimal256,
-    pub extension_reward_index: Decimal256,
     pub shares: Uint128,
     pub lm_pending_reward: Uint128,
     pub lm_reward_index: Decimal256,
