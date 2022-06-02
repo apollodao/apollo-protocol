@@ -3,11 +3,11 @@ use crate::utils::execute_send_tokens;
 use cosmwasm_std::{DepsMut, Env, MessageInfo, Response, StdResult};
 use cw20_base::ContractError;
 
-pub fn base_dex_execute<C, P>(
+pub fn base_dex_execute<C>(
     deps: DepsMut,
     env: Env,
     info: MessageInfo,
-    msg: BaseDexAdaptorExecuteMsg<C, P>,
+    msg: BaseDexAdaptorExecuteMsg<C>,
 ) -> StdResult<Response> {
     match msg {
         BaseDexAdaptorExecuteMsg::SendTokens {

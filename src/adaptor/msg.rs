@@ -14,7 +14,7 @@ pub type AdaptorQueryMsg =
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum BaseAdaptorExecuteMsg<
-    D = BaseDexAdaptorExecuteMsg<(), ()>,
+    D = BaseDexAdaptorExecuteMsg<()>,
     S = BaseStakingAdaptorExecuteMsg<()>,
 > {
     Receive(Cw20ReceiveMsg),
@@ -41,7 +41,7 @@ pub enum BaseAdaptorCw20HookMsg<S = (), D = ()> {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
-pub enum BaseDexAdaptorExecuteMsg<C = (), P = ()> {
+pub enum BaseDexAdaptorExecuteMsg<C = ()> {
     ProvideLiquidity {
         assets: [Asset; 2],
         slippage_tolerance: Option<Decimal>,
@@ -56,7 +56,7 @@ pub enum BaseDexAdaptorExecuteMsg<C = (), P = ()> {
     },
     AddPair {
         asset_infos: [AssetInfo; 2],
-        pair_info: P,
+        pair_info: Binary,
     },
     Callback(C),
 }
@@ -187,6 +187,7 @@ pub struct PairInfo<I = ()> {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct PoolReserves {
+    pub pair_type: PairType,
     pub from: Asset,
     pub to: Asset,
     pub amp: u64,
