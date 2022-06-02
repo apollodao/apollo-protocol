@@ -99,7 +99,8 @@ pub enum BaseDexAdaptorQueryMsg<A = ()> {
         amount: Uint128,
     },
     Reserves {
-        asset_infos: [AssetInfo; 2],
+        from: AssetInfo,
+        to: AssetInfo,
     },
     Balance {
         asset: AssetInfo,
@@ -181,6 +182,14 @@ pub struct AprResponse {
 pub struct PairInfo<I = ()> {
     pub pair_type: PairType,
     pub pair_info: I,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[schemars(deny_unknown_fields)]
+pub struct PoolReserves {
+    pub from: Asset,
+    pub to: Asset,
+    pub amp: u64,
 }
 
 // TODO - might be able to remove below, but keeping for now in case we can reuse
