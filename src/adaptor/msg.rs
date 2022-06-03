@@ -43,7 +43,8 @@ pub enum BaseAdaptorCw20HookMsg<S = (), D = ()> {
 #[schemars(deny_unknown_fields)]
 pub enum BaseDexAdaptorExecuteMsg<C = ()> {
     ProvideLiquidity {
-        assets: [Asset; 2],
+        assets: Vec<Asset>,
+        pair_info: Binary,
         slippage_tolerance: Option<Decimal>,
         auto_stake: Option<bool>,
         recipient: Option<Addr>,
