@@ -303,7 +303,7 @@ pub fn query_token_balance(
     Ok(res.balance)
 }
 
-pub fn execute_send_tokens<D: CustomQuery>(
+pub fn execute_send_tokens<D: CustomQuery, T>(
     deps: DepsMut<D>,
     env: Env,
     info: MessageInfo,
@@ -311,7 +311,7 @@ pub fn execute_send_tokens<D: CustomQuery>(
     amount: Option<Uint128>,
     recipient: Addr,
     hook_msg: Option<Binary>,
-) -> StdResult<Response> {
+) -> StdResult<Response<T>> {
     only_allow_human_addr(&info, env.contract.address.as_str())?;
 
     let amount = amount.unwrap_or_else(|| {
@@ -319,6 +319,13 @@ pub fn execute_send_tokens<D: CustomQuery>(
             .query_balance(&deps.querier, env.contract.address.clone())
             .unwrap_or_default()
     });
+
+    let funds = if token.is_native_token() {
+        vec![Coin::new(amount.u128(), token.to_string())]
+    } else {
+        vec![]
+    };
+
     let send = match hook_msg {
         Some(cw20_hook_msg) => CosmosMsg::Wasm(WasmMsg::Execute {
             contract_addr: token.to_string(),
@@ -327,7 +334,7 @@ pub fn execute_send_tokens<D: CustomQuery>(
                 amount,
                 msg: cw20_hook_msg,
             })?,
-            funds: vec![],
+            funds,
         }),
         None => CosmosMsg::Wasm(WasmMsg::Execute {
             contract_addr: token.to_string(),
@@ -335,7 +342,7 @@ pub fn execute_send_tokens<D: CustomQuery>(
                 amount,
                 recipient: recipient.to_string(),
             })?,
-            funds: vec![],
+            funds,
         }),
     };
 
