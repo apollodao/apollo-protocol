@@ -1,8 +1,8 @@
 use apollo_asset::asset::AssetInfo;
 use cosmwasm_std::{
-    to_binary, Addr, Api, Binary, CanonicalAddr, Coin, CosmosMsg, Decimal, Decimal256, Deps,
-    DepsMut, Env, Event, Fraction, MessageInfo, QuerierWrapper, QueryRequest, Response, StdError,
-    StdResult, Uint128, Uint256, WasmMsg, WasmQuery,
+    to_binary, Addr, Api, Binary, CanonicalAddr, Coin, CosmosMsg, CustomQuery, Decimal, Decimal256,
+    Deps, DepsMut, Env, Event, Fraction, MessageInfo, QuerierWrapper, QueryRequest, Response,
+    StdError, StdResult, Uint128, Uint256, WasmMsg, WasmQuery,
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
 use std::convert::{TryFrom, TryInto};
@@ -303,8 +303,8 @@ pub fn query_token_balance(
     Ok(res.balance)
 }
 
-pub fn execute_send_tokens(
-    deps: DepsMut,
+pub fn execute_send_tokens<D: CustomQuery>(
+    deps: DepsMut<D>,
     env: Env,
     info: MessageInfo,
     token: AssetInfo,
