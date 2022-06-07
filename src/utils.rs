@@ -1,8 +1,8 @@
 use apollo_asset::asset::AssetInfo;
 use cosmwasm_std::{
-    to_binary, Addr, Api, Binary, CanonicalAddr, Coin, CosmosMsg, CustomQuery, Decimal, Decimal256,
-    Deps, DepsMut, Env, Event, Fraction, MessageInfo, QuerierWrapper, QueryRequest, Response,
-    StdError, StdResult, Uint128, Uint256, WasmMsg, WasmQuery,
+    to_binary, Addr, Api, BankMsg, Binary, CanonicalAddr, Coin, CosmosMsg, CustomQuery, Decimal,
+    Decimal256, Deps, DepsMut, Env, Event, Fraction, MessageInfo, QuerierWrapper, QueryRequest,
+    Response, StdError, StdResult, Uint128, Uint256, WasmMsg, WasmQuery,
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
 use std::convert::{TryFrom, TryInto};
@@ -327,22 +327,28 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
     };
 
     let send = match hook_msg {
-        Some(cw20_hook_msg) => CosmosMsg::Wasm(WasmMsg::Execute {
-            contract_addr: token.to_string(),
-            msg: to_binary(&Cw20ExecuteMsg::Send {
-                contract: recipient.to_string(),
-                amount,
-                msg: cw20_hook_msg,
-            })?,
-            funds,
-        }),
-        None => CosmosMsg::Wasm(WasmMsg::Execute {
-            contract_addr: token.to_string(),
-            msg: to_binary(&Cw20ExecuteMsg::Transfer {
-                amount,
-                recipient: recipient.to_string(),
-            })?,
-            funds,
+        Some(cw20_hook_msg) => {
+            if token.is_native_token() {
+                CosmosMsg::Wasm(WasmMsg::Execute {
+                    contract_addr: recipient.to_string(),
+                    msg: cw20_hook_msg,
+                    funds,
+                })
+            } else {
+                CosmosMsg::Wasm(WasmMsg::Execute {
+                    contract_addr: token.to_string(),
+                    msg: to_binary(&Cw20ExecuteMsg::Send {
+                        contract: recipient.to_string(),
+                        amount,
+                        msg: cw20_hook_msg,
+                    })?,
+                    funds,
+                })
+            }
+        }
+        None => CosmosMsg::Bank(BankMsg::Send {
+            to_address: recipient.to_string(),
+            amount: funds,
         }),
     };
 
