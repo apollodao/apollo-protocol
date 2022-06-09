@@ -88,12 +88,6 @@ pub enum BaseStrategyExecuteMsg<S> {
         executor: Option<String>, // recipient for execution fee (defaults to sender)
         cost: Option<Uint128>, // provide cost amount to query shouldExecute() with before executing
     },
-    SendTokens {
-        token: Addr,
-        recipient: Addr,
-        amount: Option<Uint128>,
-        hook_msg: Option<Binary>,
-    },
     Strategy(S),
 }
 
