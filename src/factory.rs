@@ -81,8 +81,6 @@ pub enum ExecuteMsg {
         warchest: Option<String>,
         distribution_schedule: Option<Vec<(u64, u64, Uint128)>>,
         genesis_time: Option<u64>,
-        apollo_token: Option<String>,
-        apollo_reward_percentage: Option<Decimal>,
     },
     ZapIntoStrategy {
         strategy_id: u64,
@@ -156,8 +154,6 @@ pub struct FactoryConfig {
     // ( initial time , token distribution period, total distribution amount)
     pub distribution_schedule: Vec<(u64, u64, Uint128)>,
     pub genesis_time: u64,
-    pub apollo_token: CanonicalAddr,
-    pub apollo_reward_percentage: Decimal, //Percentage of rewards going to apollo strategies
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -225,8 +221,6 @@ pub struct GetConfigResponse {
     pub warchest: Addr,
     pub distribution_schedule: Vec<(u64, u64, Uint128)>,
     pub genesis_time: u64,
-    pub apollo_token: Addr,
-    pub apollo_reward_percentage: Decimal,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
