@@ -1,6 +1,6 @@
 use cosmwasm_std::{
-    Addr, Binary, CanonicalAddr, Decimal, Decimal256, Order, QuerierWrapper, Record, StdError,
-    StdResult, Storage, Uint128, Uint256,
+    Addr, Binary, Decimal, Decimal256, Order, QuerierWrapper, Record, StdError, StdResult, Storage,
+    Uint128, Uint256,
 };
 use cw20::Cw20ReceiveMsg;
 use cw_storage_plus::{Item, Map};
@@ -149,8 +149,8 @@ pub enum QueryMsg {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct FactoryConfig {
-    pub owner: CanonicalAddr,
-    pub warchest: CanonicalAddr,
+    pub owner: Addr,
+    pub warchest: Addr,
     // ( initial time , token distribution period, total distribution amount)
     pub distribution_schedule: Vec<(u64, u64, Uint128)>,
     pub genesis_time: u64,
@@ -282,7 +282,7 @@ pub struct CfeRewards {
 #[schemars(deny_unknown_fields)]
 pub struct FactoryStrategyConfig {
     //Strategies must have these three fields in their config, other fields are allowed.
-    pub base_token: CanonicalAddr,
+    pub base_token: Addr,
     pub performance_fee: Decimal,
 }
 

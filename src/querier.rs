@@ -1,6 +1,6 @@
 use cosmwasm_std::{
-    to_binary, Addr, Binary, CanonicalAddr, Decimal, Empty, Order, QuerierWrapper, QueryRequest,
-    Record, StdError, StdResult, Uint128, Uint256, WasmQuery,
+    to_binary, Addr, Binary, Decimal, Empty, Order, QuerierWrapper, QueryRequest, Record, StdError,
+    StdResult, Uint128, Uint256, WasmQuery,
 };
 use cosmwasm_storage::to_length_prefixed;
 
@@ -14,7 +14,7 @@ use crate::{
 pub fn query_strategy_user_info(
     querier: &QuerierWrapper,
     strategy: &Addr,
-    user: &CanonicalAddr,
+    user: &Addr,
 ) -> UserInfo {
     querier
         .query(&QueryRequest::Wasm(WasmQuery::Raw {

@@ -2,8 +2,8 @@ use std::str::FromStr;
 
 use apollo_asset::asset::AssetInfo;
 use cosmwasm_std::{
-    Addr, Api, CanonicalAddr, Coin, Decimal, Decimal256, QuerierWrapper, QueryRequest, StdError,
-    StdResult, Uint128, Uint256,
+    Addr, Api, Coin, Decimal, Decimal256, QuerierWrapper, QueryRequest, StdError, StdResult,
+    Uint128, Uint256,
 };
 use cw_storage_plus::{Item, Map};
 use schemars::JsonSchema;
@@ -101,7 +101,7 @@ pub struct PriceInfo {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct Config {
-    pub owner: CanonicalAddr,
+    pub owner: Addr,
     pub base_asset: String,
 }
 
