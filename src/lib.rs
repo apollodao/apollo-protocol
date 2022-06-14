@@ -5,6 +5,7 @@ pub mod legacy_strategy;
 pub mod legacy_vault;
 pub mod oracle;
 pub mod querier;
+pub mod router;
 pub mod strategy;
 pub mod strategy_token;
 pub mod utils;
