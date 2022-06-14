@@ -1,5 +1,3 @@
-use apollo_asset::asset::AssetInfo;
-use cosmwasm_std::Addr;
 use cw20_base::msg::InstantiateMsg as Cw20InstantiateMsg;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};

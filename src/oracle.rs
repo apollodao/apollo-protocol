@@ -1,10 +1,7 @@
 use std::str::FromStr;
 
 use apollo_asset::asset::AssetInfo;
-use cosmwasm_std::{
-    Addr, Api, Coin, Decimal, Decimal256, QuerierWrapper, QueryRequest, StdError, StdResult,
-    Uint128, Uint256,
-};
+use cosmwasm_std::{Addr, Api, Decimal256, QuerierWrapper, StdError, StdResult, Uint256};
 use cw_storage_plus::{Item, Map};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -108,6 +105,7 @@ pub struct Config {
 pub const PRICES: Map<&str, PriceInfo> = Map::new("prices");
 pub const CONFIG: Item<Config> = Item::new("config");
 
+// Remote Raw contract call
 pub fn query_config(querier: &QuerierWrapper, oracle: &Addr) -> StdResult<Config> {
     CONFIG.query(querier, oracle.clone())
 }
@@ -172,7 +170,7 @@ pub fn query_oracle_price(
 
 pub fn calculate_lp_price(
     querier: &QuerierWrapper,
-    api: &dyn Api,
+    _api: &dyn Api,
     asset0: AssetInfo,
     asset1: AssetInfo,
     asset0_price: Decimal256,

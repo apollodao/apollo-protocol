@@ -9,9 +9,7 @@ use super::{
     state::{BASE_TOKEN, ORACLE, STAKING_ADAPTOR, STRATEGY_TOKEN},
 };
 
-use crate::adaptor::msg::{
-    AdaptorExecuteMsg, AdaptorQueryMsg, BaseAdaptorQueryMsg, BaseStakingAdaptorQueryMsg,
-};
+use crate::adaptor::msg::{AdaptorQueryMsg, BaseStakingAdaptorQueryMsg};
 use crate::{
     oracle::query_oracle_price,
     utils::{calculate_user_bonds, query_token_balance},
@@ -37,7 +35,7 @@ pub fn query_total_bond_amount(deps: Deps, env: &Env, token: Option<Addr>) -> St
 
 //Query the total shares in the Strategy and total base_token amount in the Strategy
 pub fn query_strategy_info(deps: Deps, env: Env, token: Option<Addr>) -> StdResult<StrategyInfo> {
-    let adaptor_addr = STAKING_ADAPTOR.load(deps.storage)?;
+    let _adaptor_addr = STAKING_ADAPTOR.load(deps.storage)?;
     let strategy_token = STRATEGY_TOKEN.load(deps.storage)?;
 
     let total_bond_amount = query_total_bond_amount(deps, &env, token)?;
@@ -78,7 +76,7 @@ pub fn query_user_info(
     })
 }
 
-pub fn query_tvl(deps: Deps, env: Env) -> StdResult<TvlResponse> {
+pub fn query_tvl(deps: Deps, _env: Env) -> StdResult<TvlResponse> {
     let oracle_addr = ORACLE.load(deps.storage)?;
     let asset_token = BASE_TOKEN.load(deps.storage)?;
     let proxy_addr = STAKING_ADAPTOR.load(deps.storage)?;

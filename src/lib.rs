@@ -8,6 +8,7 @@ pub mod querier;
 pub mod strategy;
 pub mod strategy_token;
 pub mod utils;
+pub mod error;
 
-#[cfg(test)]
-mod tests;
+// #[cfg(test)]
+// mod tests;
