@@ -1,0 +1,8 @@
+[formatting]
+# Omit white space padding from the start and end of inline tables.
+compact_inline_tables = true
+# Maximum column width in characters, affects array expansion and collapse, this doesn't take whitespace into account.
+# Note that this is not set in stone, and works on a best-effort basis.
+column_width = 33
+# Alphabetically reorder keys that are not separated by empty lines.
+reorder_keys = true
