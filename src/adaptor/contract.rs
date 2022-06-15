@@ -1,14 +1,13 @@
-use crate::adaptor::msg::{BaseAdaptorExecuteMsg, BaseDexAdaptorExecuteMsg};
 use crate::utils::execute_send_tokens;
-use cosmwasm_std::{CustomQuery, DepsMut, Empty, Env, MessageInfo, Response, StdResult};
-use cw20_base::ContractError;
+use crate::{adaptor::msg::BaseDexAdaptorExecuteMsg, error::ContractError};
+use cosmwasm_std::{CustomQuery, DepsMut, Env, MessageInfo, Response};
 
 pub fn base_dex_execute<C, D: CustomQuery>(
     deps: DepsMut<D>,
     env: Env,
     info: MessageInfo,
     msg: BaseDexAdaptorExecuteMsg<C>,
-) -> StdResult<Response> {
+) -> Result<Response, ContractError> {
     match msg {
         BaseDexAdaptorExecuteMsg::SendTokens {
             token,

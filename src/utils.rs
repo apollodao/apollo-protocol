@@ -1,64 +1,72 @@
 use apollo_asset::asset::AssetInfo;
 use cosmwasm_std::{
-    to_binary, Addr, Api, BankMsg, Binary, CanonicalAddr, Coin, CosmosMsg, CustomQuery, Decimal,
-    Decimal256, Deps, DepsMut, Env, Event, Fraction, MessageInfo, QuerierWrapper, QueryRequest,
-    Response, StdError, StdResult, Uint128, Uint256, WasmMsg, WasmQuery,
+    to_binary, Addr, Api, BankMsg, Binary, CanonicalAddr, CheckedFromRatioError, Coin,
+    ConversionOverflowError, CosmosMsg, CustomQuery, Decimal, Decimal256, Deps, DepsMut, Empty,
+    Env, Event, Fraction, MessageInfo, QuerierWrapper, QueryRequest, Response, StdError, StdResult,
+    Uint128, Uint256, WasmMsg, WasmQuery,
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
 use std::convert::{TryFrom, TryInto};
 
-pub fn only_allow_human_addr(message_info: &MessageInfo, address: &str) -> StdResult<()> {
+use crate::error::ContractError;
+
+pub fn only_allow_human_addr(
+    message_info: &MessageInfo,
+    address: &str,
+) -> Result<Empty, ContractError> {
     if address != message_info.sender {
-        Err(StdError::generic_err("unauthorized"))
+        Err(ContractError::Unauthorized {})
     } else {
-        Ok(())
+        Ok(Empty {})
     }
 }
 
-pub fn only_allow_addresses(message_info: &MessageInfo, addresses: Vec<&str>) -> StdResult<()> {
+pub fn only_allow_addresses(
+    message_info: &MessageInfo,
+    addresses: Vec<&str>,
+) -> Result<Empty, ContractError> {
     for address in &addresses {
         if *address == &message_info.sender.to_string() {
-            return Ok(());
+            return Ok(Empty {});
         }
     }
-    Err(StdError::generic_err(format!(
+    Err(ContractError::Std(StdError::generic_err(format!(
         "unauthorized - {}, required - {:?}",
         message_info.sender, addresses
-    )))
+    ))))
 }
 
 pub fn only_allow_canon_addr(
     api: &dyn Api,
     message_info: &MessageInfo,
     address: &CanonicalAddr,
-) -> StdResult<()> {
+) -> Result<Empty, ContractError> {
     let sender_address_raw = api.addr_canonicalize(message_info.sender.as_str())?;
     if address != &sender_address_raw {
-        println!("debug 3");
-        return Err(StdError::generic_err("unauthorized"));
+        return Err(ContractError::Unauthorized {});
     }
-    Ok(())
+    Ok(Empty {})
 }
 
 const DECIMAL_FRACTIONAL: Uint128 = Uint128::new(1_000_000_000u128);
 
-pub fn reverse_decimal(decimal: Decimal) -> StdResult<Decimal> {
-    if decimal > Decimal::zero() {
-        Ok(Decimal::from_ratio(
-            DECIMAL_FRACTIONAL,
-            decimal * DECIMAL_FRACTIONAL,
-        ))
-    } else {
-        Err(StdError::generic_err("decimal is zero"))
-    }
+// TODO: remove decimal_division, reverse_decimal and decimal_multiplication
+/// return a / b
+pub fn decimal_division(a: Decimal, b: Decimal) -> Result<Decimal, CheckedFromRatioError> {
+    Decimal::checked_from_ratio(DECIMAL_FRACTIONAL * a, b * DECIMAL_FRACTIONAL)
 }
 
-pub fn decimal_multiplication(a: Decimal, b: Decimal) -> Decimal {
-    Decimal::from_ratio(a * DECIMAL_FRACTIONAL * b, DECIMAL_FRACTIONAL)
+pub fn reverse_decimal(decimal: Decimal) -> Result<Decimal, CheckedFromRatioError> {
+    Decimal::checked_from_ratio(DECIMAL_FRACTIONAL, decimal * DECIMAL_FRACTIONAL)
+}
+
+pub fn decimal_multiplication(a: Decimal, b: Decimal) -> Result<Decimal, CheckedFromRatioError> {
+    Decimal::checked_from_ratio(a * DECIMAL_FRACTIONAL * b, DECIMAL_FRACTIONAL)
 }
 
 pub fn query_supply(querier: &QuerierWrapper, contract_addr: Addr) -> StdResult<Uint128> {
     // load price form the oracle
+    // TODO: Should we use query_wasm_smart or query_wasm_raw?
     let token_info: TokenInfoResponse = querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
         contract_addr: contract_addr.to_string(),
         msg: to_binary(&Cw20QueryMsg::TokenInfo {})?,
@@ -66,19 +74,6 @@ pub fn query_supply(querier: &QuerierWrapper, contract_addr: Addr) -> StdResult<
 
     Ok(token_info.total_supply)
 }
-
-/// return a / b
-pub fn decimal_division(a: Decimal, b: Decimal) -> StdResult<Decimal> {
-    if b > Decimal::zero() {
-        let result = Decimal::from_ratio(DECIMAL_FRACTIONAL * a, b * DECIMAL_FRACTIONAL);
-
-        Ok(result)
-    } else {
-        Err(StdError::generic_err("b is zero"))
-    }
-}
-
-static DECIMAL_FRACTION: Uint128 = Uint128::new(1_000_000_000_000_000_000u128);
 
 pub fn round_half_to_even_128(a: Decimal) -> Uint128 {
     let numerator = a.numerator();
@@ -213,7 +208,7 @@ pub fn calculate_user_bonds(
     shares: Uint128,
     total_shares: Uint128,
     total_bond_amount: Uint128,
-) -> StdResult<Uint128> {
+) -> Result<Uint128, ConversionOverflowError> {
     if total_shares.is_zero() {
         return Ok(Uint128::zero());
     }
@@ -311,7 +306,7 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
     amount: Option<Uint128>,
     recipient: Addr,
     hook_msg: Option<Binary>,
-) -> StdResult<Response<T>> {
+) -> Result<Response<T>, ContractError> {
     only_allow_human_addr(&info, env.contract.address.as_str())?;
 
     let amount = amount.unwrap_or_else(|| {
@@ -355,19 +350,17 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
     Ok(Response::new().add_message(send))
 }
 
-pub fn parse_u8_key(data: &[u8]) -> StdResult<u8> {
+pub fn parse_u8_key(data: &[u8]) -> Result<u8, ContractError> {
     match data[0..8].try_into() {
         Ok(bytes) => Ok(u8::from_be_bytes(bytes)),
-        Err(_) => Err(StdError::generic_err(
-            "Corrupted data found. 8 byte expected.",
-        )),
+        Err(_) => Err(ContractError::CorruptedData {}),
     }
 }
 
 pub fn parse_contract_addr_from_instantiate_event(
     deps: Deps,
     events: Vec<Event>,
-) -> StdResult<Addr> {
+) -> Result<Addr, ContractError> {
     Ok(deps.api.addr_validate(
         &events
             .into_iter()
@@ -382,14 +375,17 @@ pub fn parse_contract_addr_from_instantiate_event(
     )?)
 }
 
-pub fn decimal256_to_decimal(decimal: Decimal256) -> StdResult<Decimal> {
-    let atomics: Uint128 = decimal.atomics().try_into()?;
+pub fn decimal256_to_decimal(decimal: Decimal256) -> Result<Decimal, ContractError> {
+    let atomics: Uint128 = decimal
+        .atomics()
+        .try_into()
+        .map_err(|e| ContractError::ConversionOverflowError(e))?;
     Ok(Decimal::from_atomics(atomics, decimal.decimal_places())
-        .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
+        .map_err(|e| ContractError::DecimalRangeExceeded(e))?)
 }
 
-pub fn decimal_to_decimal256(decimal: Decimal) -> StdResult<Decimal256> {
+pub fn decimal_to_decimal256(decimal: Decimal) -> Result<Decimal256, ContractError> {
     let atomics: Uint128 = decimal.atomics();
     Ok(Decimal256::from_atomics(atomics, decimal.decimal_places())
-        .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
+        .map_err(|e| ContractError::Decimal256RangeExceeded(e))?)
 }

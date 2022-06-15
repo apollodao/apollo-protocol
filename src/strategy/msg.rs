@@ -1,9 +1,7 @@
 use apollo_asset::asset::{Asset, AssetInfo};
-use cosmwasm_std::{Addr, Binary, Decimal, Decimal256, Uint128};
-use cw20::Cw20ReceiveMsg;
+use cosmwasm_std::{Addr, Decimal, Decimal256, Uint128};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::convert::TryInto;
 
 pub type QueryMsg = BaseStrategyQueryMsg<()>;
 

@@ -1,9 +1,9 @@
 use cosmwasm_std::{
-    attr, Addr, ContractResult, Deps, DepsMut, Env, Event, Reply, Response, StdError, StdResult,
-    Storage, SubMsgExecutionResponse, SubMsgResponse, SubMsgResult,
+    attr, Addr, DepsMut, Env, Reply, Response, StdError, StdResult, Storage, SubMsgResponse,
+    SubMsgResult,
 };
 
-use crate::utils::parse_contract_addr_from_instantiate_event;
+use crate::{error::ContractError, utils::parse_contract_addr_from_instantiate_event};
 
 use super::state::STRATEGY_TOKEN;
 
@@ -16,29 +16,29 @@ pub const REPLY_STRATEGY_EXECUTE_GRACE_FAIL: u64 = 1;
 /**
  * Base reply handler for strategy. Sets up strategy token and proxy addresses.
  */
-pub fn base_strategy_reply(deps: DepsMut, _env: Env, msg: Reply) -> StdResult<Response> {
+pub fn base_strategy_reply(
+    deps: DepsMut,
+    _env: Env,
+    msg: Reply,
+) -> Result<Response, ContractError> {
     match msg.id {
         REPLY_SAVE_STRATEGY_TOKEN_ADDR => match msg.result {
             SubMsgResult::Ok(subcall) => {
                 reply_save_addr(deps, subcall, |s, addr| STRATEGY_TOKEN.save(s, &addr))
             }
-            SubMsgResult::Err(_) => Err(StdError::generic_err(
-                "Failed to initialize strategy token.",
-            )),
+            SubMsgResult::Err(_) => Err(ContractError::FailedToInitializeStrategyToken {}),
         },
         REPLY_STRATEGY_EXECUTE_GRACE_FAIL => match msg.result {
             SubMsgResult::Err(e) => {
                 if e.contains("not optimal to execute") {
                     Ok(Response::new().add_attribute("autocompound", e))
                 } else {
-                    Err(StdError::generic_err(e))
+                    Err(ContractError::Std(StdError::generic_err(e)))
                 }
             }
-            SubMsgResult::Ok(_) => Err(StdError::generic_err(
-                "unexpected - should not be called on success",
-            )),
+            SubMsgResult::Ok(_) => Err(ContractError::UnExpected {}),
         },
-        _ => Err(StdError::generic_err("Unknown reply operation")),
+        _ => Err(ContractError::UnknownReply {}),
     }
 }
 
@@ -50,7 +50,7 @@ pub fn reply_save_addr(
     deps: DepsMut,
     subcall: SubMsgResponse,
     save_addr: fn(&mut dyn Storage, Addr) -> StdResult<()>,
-) -> StdResult<Response> {
+) -> Result<Response, ContractError> {
     let addr = parse_contract_addr_from_instantiate_event(deps.as_ref(), subcall.events)?;
     save_addr(deps.storage, addr.clone())?;
 
