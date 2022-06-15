@@ -10,6 +10,7 @@ pub static APOLLO_CONTRACTS: Item<ApolloContracts> = Item::new("apollo_contracts
 pub static APOLLO_DEX_ADAPTORS: Map<u8, Addr> = Map::new("apollo_dex_adaptors");
 pub const APOLLO_DEX_COUNT: Item<u8> = Item::new("apollo_dex_count");
 
+// TODO: Is this an iterator? If not we should define as increment instead of next
 pub fn next_dex_id(store: &mut dyn Storage) -> StdResult<u8> {
     let id: u8 = APOLLO_DEX_COUNT.may_load(store)?.unwrap_or_default() + 1;
     APOLLO_DEX_COUNT.save(store, &id)?;
