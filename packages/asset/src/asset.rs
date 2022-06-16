@@ -1,4 +1,7 @@
-use crate::querier::{query_balance, query_token_balance, query_token_symbol};
+use crate::{
+    error::ContractError,
+    querier::{query_balance, query_token_balance, query_token_symbol},
+};
 use cosmwasm_std::{
     Addr, Api, Coin, CustomQuery, MessageInfo, QuerierWrapper, StdError, StdResult, Uint128,
 };
@@ -288,6 +291,7 @@ impl AssetInfo {
         }
     }
 
+    // TODO: Why a Result when it always return a value and handle all errors?
     pub fn from_str(api: &dyn Api, str: &str) -> StdResult<Self> {
         match api.addr_validate(str) {
             Ok(contract_addr) => Ok(Self::Token { contract_addr }),
