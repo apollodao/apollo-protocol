@@ -14,10 +14,14 @@ version = "1.0.0"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
+ "cw-multi-test",
  "cw-storage-plus",
+ "cw-utils",
  "cw20",
  "schemars",
  "serde",
+ "test-case",
+ "thiserror",
 ]
 
 [[package]]

@@ -31,4 +31,15 @@ pub enum ContractError {
 
     #[error("Unknown reply operation")]
     UnknownReply,
+
+    #[error("Distribution schedule is empty")]
+    EmptyDistributionSchedule,
+
+    #[error("Invalid date ranges in distribution schedule")]
+    InvalidDistributionScheduleRanges,
+
+    #[error("Distribution schedule contains gaps or overlaps")]
+    OverlappedDistributionRanges
+
+
 }

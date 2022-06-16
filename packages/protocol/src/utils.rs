@@ -375,17 +375,39 @@ pub fn parse_contract_addr_from_instantiate_event(
     )?)
 }
 
-pub fn decimal256_to_decimal(decimal: Decimal256) -> Result<Decimal, ContractError> {
+pub fn decimal256_to_decimal(decimal: Decimal256) -> StdResult<Decimal> {
     let atomics: Uint128 = decimal
         .atomics()
-        .try_into()
-        .map_err(|e| ContractError::ConversionOverflowError(e))?;
+        .try_into()?;
     Ok(Decimal::from_atomics(atomics, decimal.decimal_places())
-        .map_err(|e| ContractError::DecimalRangeExceeded(e))?)
+    .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
 }
 
-pub fn decimal_to_decimal256(decimal: Decimal) -> Result<Decimal256, ContractError> {
+pub fn decimal_to_decimal256(decimal: Decimal) -> StdResult<Decimal256> {
     let atomics: Uint128 = decimal.atomics();
     Ok(Decimal256::from_atomics(atomics, decimal.decimal_places())
-        .map_err(|e| ContractError::Decimal256RangeExceeded(e))?)
+    .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
+}
+
+pub fn validate_distribution_schedule(
+    schedule: &Vec<(u64, u64, Uint128)>,
+) -> Result<(), ContractError> {
+    if schedule.len() == 0 {
+        return Err(ContractError::EmptyDistributionSchedule {});
+    }
+
+    let mut last_end = 0u64;
+    for s in schedule {
+        if s.0 >= s.1 {
+            return Err(ContractError::InvalidDistributionScheduleRanges {});
+        }
+
+        if s.0 != last_end + 1 && last_end != 0 {
+            return Err(ContractError::OverlappedDistributionRanges {});
+        }
+
+        last_end = s.1;
+    }
+
+    Ok(())
 }
