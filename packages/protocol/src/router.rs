@@ -30,6 +30,7 @@ pub enum ExecuteMsg {
         to: AssetInfo,
         max_spread: Option<Decimal>,
         recipient: Option<String>,
+        hook_msg: Option<Binary>,
         split: Option<bool>,
     },
     /// Internal use
@@ -39,8 +40,9 @@ pub enum ExecuteMsg {
         swap_info: SwapInfo,
         /// Optional address to deposit target token
         recipient: Option<String>,
+        /// Optional hook msg to send along with swap result to recipient
+        hook_msg: Option<Binary>,
         max_spread: Option<Decimal>,
-        allo: Option<Decimal>,
     },
     /// Internal use
     /// Check the swap amount is exceed minimum_receive
@@ -70,6 +72,7 @@ pub enum Cw20HookMsg {
         to: AssetInfo,
         max_spread: Option<Decimal>,
         recipient: Option<String>,
+        hook_msg: Option<Binary>,
         split: Option<bool>,
     },
 }
@@ -110,11 +113,9 @@ pub struct MigrateMsg {}
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct DexesResponseItem {
     /// Dex adaptor id
-    pub id: u16,
+    pub id: usize,
     /// Dex adaptor address
     pub adaptor_addr: Addr,
-    /// Dex factory address
-    pub factory_addr: Addr,
 }
 
 /// Dexes query response

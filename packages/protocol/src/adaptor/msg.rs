@@ -115,8 +115,6 @@ pub enum BaseDexAdaptorQueryMsg<A = ()> {
         to: AssetInfo,
         amount: Uint128,
         max_spread: Option<Decimal>,
-        recipient: Option<String>,
-        hook_msg: Option<Binary>,
     },
     Adaptor(A),
 }
