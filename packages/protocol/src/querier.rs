@@ -6,7 +6,7 @@ use cosmwasm_storage::to_length_prefixed;
 
 use crate::{
     factory::FactoryConfig,
-    legacy_strategy::msg::{StrategyConfig, StrategyInfo, UserInfo}, error::ContractError,
+    legacy_strategy::msg::{StrategyConfig, StrategyInfo, UserInfo},
 };
 
 ///Contains functions to query the store of Apollo contracts. This is to optimize gas usage when querying between contracts of Apollo Protocol.

@@ -1,7 +1,4 @@
-use crate::{
-    error::ContractError,
-    querier::{query_balance, query_token_balance, query_token_symbol},
-};
+use crate::querier::{query_balance, query_token_balance, query_token_symbol};
 use cosmwasm_std::{
     Addr, Api, Coin, CustomQuery, MessageInfo, QuerierWrapper, StdError, StdResult, Uint128,
 };

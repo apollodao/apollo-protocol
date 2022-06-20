@@ -62,6 +62,11 @@ pub enum ExecuteMsg {
         amount: Option<Uint128>,
         hook_msg: Option<Binary>,
     },
+    /// Query pair reserves and record price/twap
+    CollectPrice {
+        assets: [AssetInfo; 2],
+        dex_id: u16,
+    },
 }
 
 /// CW20 Hook
@@ -104,10 +109,16 @@ pub enum QueryMsg {
         to: AssetInfo,
         amount: Option<Uint128>,
     },
+    /// Get price of a pair (use verbose flag to get more info)
+    Price {
+        assets: [AssetInfo; 2],
+        dex_id: u16,
+        /// Get more info on prices used to calculate the TWAP
+        verbose: bool,
+        /// Specify asset in pair to get the price of
+        asset: Option<AssetInfo>,
+    },
 }
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct MigrateMsg {}
 
 /// Dexes query response item
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

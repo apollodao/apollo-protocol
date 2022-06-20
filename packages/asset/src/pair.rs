@@ -52,3 +52,14 @@ pub enum PairType {
     /// Stable pair type
     Stable {},
 }
+
+/// ## Description
+/// Calculates key of pair from the specified parameters in the `asset_infos` variable.
+/// ## Params
+/// `asset_infos` it is array with two items the type of [`AssetInfo`].
+pub fn pair_key(asset_infos: &[AssetInfo; 2]) -> Vec<u8> {
+    let mut asset_infos = asset_infos.to_vec();
+    asset_infos.sort_by(|a, b| a.as_bytes().cmp(b.as_bytes()));
+
+    [asset_infos[0].as_bytes(), asset_infos[1].as_bytes()].concat()
+}
