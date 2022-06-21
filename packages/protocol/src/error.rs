@@ -39,7 +39,5 @@ pub enum ContractError {
     InvalidDistributionScheduleRanges,
 
     #[error("Distribution schedule contains gaps or overlaps")]
-    OverlappedDistributionRanges
-
-
+    OverlappedDistributionRanges,
 }

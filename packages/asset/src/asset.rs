@@ -110,7 +110,7 @@ impl Asset {
 /// ## Examples
 /// ```
 /// # use cosmwasm_std::Addr;
-/// # use astroport::asset::AssetInfo::{NativeToken, Token};
+/// # use apollo_asset::asset::AssetInfo::{NativeToken, Token};
 /// Token { contract_addr: Addr::unchecked("terra...") };
 /// NativeToken { denom: String::from("uluna") };
 /// ```

@@ -21,6 +21,3 @@ cosmwasm-schema = { version = "1.0.0" }
 cw-multi-test = { version = "0.13.4" }
 cw-utils = { version = "0.13.4" }
 test-case = { version = "2.1.0" }
-
-[profile.release]
-overflow-checks = true

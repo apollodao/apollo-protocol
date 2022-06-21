@@ -1,0 +1,1 @@
+cargo doc --target-dir docs --color never --no-deps --open --workspace --exclude "cosmwasm*" --exclude "cw*"  --release
