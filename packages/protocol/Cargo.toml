@@ -2,7 +2,7 @@
 authors = ["Apollo Dev"]
 edition = "2018"
 name = "apollo-protocol"
-version = "1.0.0"
+version = "0.11.0"
 
 [dependencies]
 apollo-asset = { path = "../asset" }
@@ -21,6 +21,3 @@ cosmwasm-schema = { version = "1.0.0" }
 cw-multi-test = { version = "0.13.4" }
 cw-utils = { version = "0.13.4" }
 test-case = { version = "2.1.0" }
-
-[profile.release]
-overflow-checks = true

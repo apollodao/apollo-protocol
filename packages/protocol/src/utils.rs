@@ -1,32 +1,36 @@
 use apollo_asset::asset::AssetInfo;
 use cosmwasm_std::{
-    to_binary, Addr, Api, BankMsg, Binary, CanonicalAddr, CheckedFromRatioError, Coin,
-    ConversionOverflowError, CosmosMsg, CustomQuery, Decimal, Decimal256, Deps, DepsMut, Empty,
-    Env, Event, Fraction, MessageInfo, QuerierWrapper, QueryRequest, Response, StdError, StdResult,
-    Uint128, Uint256, WasmMsg, WasmQuery,
+    to_binary, Addr, Api, BankMsg, Binary, CheckedFromRatioError, Coin, ConversionOverflowError,
+    CosmosMsg, CustomQuery, Decimal, Decimal256, Deps, DepsMut, Empty, Env, Event, Fraction,
+    MessageInfo, QuerierWrapper, QueryRequest, Response, StdError, StdResult, Uint128, Uint256,
+    WasmMsg, WasmQuery,
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
 use std::convert::{TryFrom, TryInto};
 
 use crate::error::ContractError;
 
-pub fn only_allow_human_addr(
+/// Authorization sanity
+pub fn only_allow_address(
+    api: &dyn Api,
     message_info: &MessageInfo,
     address: &str,
 ) -> Result<Empty, ContractError> {
-    if address != message_info.sender {
+    if api.addr_validate(address)? != message_info.sender {
         Err(ContractError::Unauthorized {})
     } else {
         Ok(Empty {})
     }
 }
 
+/// Authorization sanity
 pub fn only_allow_addresses(
+    api: &dyn Api,
     message_info: &MessageInfo,
     addresses: Vec<&str>,
 ) -> Result<Empty, ContractError> {
     for address in &addresses {
-        if *address == &message_info.sender.to_string() {
+        if api.addr_validate(address)? == message_info.sender {
             return Ok(Empty {});
         }
     }
@@ -34,18 +38,6 @@ pub fn only_allow_addresses(
         "unauthorized - {}, required - {:?}",
         message_info.sender, addresses
     ))))
-}
-
-pub fn only_allow_canon_addr(
-    api: &dyn Api,
-    message_info: &MessageInfo,
-    address: &CanonicalAddr,
-) -> Result<Empty, ContractError> {
-    let sender_address_raw = api.addr_canonicalize(message_info.sender.as_str())?;
-    if address != &sender_address_raw {
-        return Err(ContractError::Unauthorized {});
-    }
-    Ok(Empty {})
 }
 
 const DECIMAL_FRACTIONAL: Uint128 = Uint128::new(1_000_000_000u128);
@@ -56,16 +48,19 @@ pub fn decimal_division(a: Decimal, b: Decimal) -> Result<Decimal, CheckedFromRa
     Decimal::checked_from_ratio(DECIMAL_FRACTIONAL * a, b * DECIMAL_FRACTIONAL)
 }
 
+/// remove this
 pub fn reverse_decimal(decimal: Decimal) -> Result<Decimal, CheckedFromRatioError> {
     Decimal::checked_from_ratio(DECIMAL_FRACTIONAL, decimal * DECIMAL_FRACTIONAL)
 }
 
+/// remove this
 pub fn decimal_multiplication(a: Decimal, b: Decimal) -> Result<Decimal, CheckedFromRatioError> {
     Decimal::checked_from_ratio(a * DECIMAL_FRACTIONAL * b, DECIMAL_FRACTIONAL)
 }
 
+/// Query supply
 pub fn query_supply(querier: &QuerierWrapper, contract_addr: Addr) -> StdResult<Uint128> {
-    // load price form the oracle
+    // load price from the oracle
     // TODO: Should we use query_wasm_smart or query_wasm_raw?
     let token_info: TokenInfoResponse = querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
         contract_addr: contract_addr.to_string(),
@@ -75,6 +70,7 @@ pub fn query_supply(querier: &QuerierWrapper, contract_addr: Addr) -> StdResult<
     Ok(token_info.total_supply)
 }
 
+/// Rounding up or down
 pub fn round_half_to_even_128(a: Decimal) -> Uint128 {
     let numerator = a.numerator();
     let fraction_unit = Decimal::one().numerator();
@@ -98,6 +94,7 @@ pub fn round_half_to_even_128(a: Decimal) -> Uint128 {
     result
 }
 
+/// Rounding up or down
 pub fn round_half_to_even_256(a: Decimal256) -> Uint256 {
     let numerator = a.numerator();
     let fraction_unit = Decimal256::one().numerator();
@@ -204,6 +201,7 @@ pub fn round_half_to_even_256(a: Decimal256) -> Uint256 {
 //     }
 // }
 
+/// Calculate users bonds
 pub fn calculate_user_bonds(
     shares: Uint128,
     total_shares: Uint128,
@@ -278,6 +276,7 @@ pub fn calculate_user_bonds(
 //     Ok(minimum_receive)
 // }
 
+/// Query token balance
 pub fn query_token_balance(
     querier: &QuerierWrapper,
     contract_addr: Addr,
@@ -298,6 +297,7 @@ pub fn query_token_balance(
     Ok(res.balance)
 }
 
+/// Send tokens
 pub fn execute_send_tokens<D: CustomQuery, T>(
     deps: DepsMut<D>,
     env: Env,
@@ -307,7 +307,7 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
     recipient: Addr,
     hook_msg: Option<Binary>,
 ) -> Result<Response<T>, ContractError> {
-    only_allow_human_addr(&info, env.contract.address.as_str())?;
+    only_allow_address(deps.as_ref().api, &info, env.contract.address.as_str())?;
 
     let amount = amount.unwrap_or_else(|| {
         token
@@ -350,6 +350,7 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
     Ok(Response::new().add_message(send))
 }
 
+/// 8u key helper
 pub fn parse_u8_key(data: &[u8]) -> Result<u8, ContractError> {
     match data[0..8].try_into() {
         Ok(bytes) => Ok(u8::from_be_bytes(bytes)),
@@ -357,6 +358,7 @@ pub fn parse_u8_key(data: &[u8]) -> Result<u8, ContractError> {
     }
 }
 
+/// Init event
 pub fn parse_contract_addr_from_instantiate_event(
     deps: Deps,
     events: Vec<Event>,
@@ -375,20 +377,21 @@ pub fn parse_contract_addr_from_instantiate_event(
     )?)
 }
 
+/// Decimal256 to Decimal conversion
 pub fn decimal256_to_decimal(decimal: Decimal256) -> StdResult<Decimal> {
-    let atomics: Uint128 = decimal
-        .atomics()
-        .try_into()?;
+    let atomics: Uint128 = decimal.atomics().try_into()?;
     Ok(Decimal::from_atomics(atomics, decimal.decimal_places())
-    .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
+        .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
 }
 
+/// Decimal to Decimal256 conversion
 pub fn decimal_to_decimal256(decimal: Decimal) -> StdResult<Decimal256> {
     let atomics: Uint128 = decimal.atomics();
     Ok(Decimal256::from_atomics(atomics, decimal.decimal_places())
-    .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
+        .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
 }
 
+/// Scheduling validation
 pub fn validate_distribution_schedule(
     schedule: &Vec<(u64, u64, Uint128)>,
 ) -> Result<(), ContractError> {
