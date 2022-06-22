@@ -50,8 +50,6 @@ pub fn get_apollo_dex_adaptor_by_addr(
 pub enum ExecuteMsg {
     AddStrategy {
         strategy: String,
-        is_apollo: bool,
-        receives_rewards: bool,
         strategy_token: Option<String>,
     },
     RemoveStrategy {
@@ -63,7 +61,6 @@ pub enum ExecuteMsg {
         execution_paused: Option<bool>,
         deposits_paused: Option<bool>,
         withdrawals_paused: Option<bool>,
-        rewards_paused: Option<bool>,
     },
     ExecuteStrategy {
         strategy_id: u64,
@@ -90,17 +87,6 @@ pub enum ExecuteMsg {
     PassMessage {
         contract_addr: String,
         msg: Binary,
-    },
-    UpdateRewardWeights {},
-    ClaimRewards {
-        strategy_id: Option<u64>,
-    },
-    UpdateRewardInfos {
-        rewards: Vec<CfeRewards>,
-    },
-    UpdateUserPendingRewardsForStrategy {
-        user_addr: String,
-        strategy_id: u64,
     },
     AddDex {
         dex_addr: String,
@@ -131,16 +117,9 @@ pub enum QueryMsg {
         id: u64,
     },
     GetTotalTvl {},
-    GetTotalCollectedFees {},
-    GetExtensionTotalCollectedFees {},
-    GetTotalRewardWeight {},
-    GetTotalCfeRewardsByUser {
-        address: String,
-    },
     GetStakerInfo {
         staker: String,
         strategy_id: u64,
-        time: Option<u64>,
     },
 }
 
@@ -170,7 +149,6 @@ pub struct FactoryStrategyInfoResponse {
     pub id: u64,
     pub address: Addr,
     pub deprecated: bool,
-    // pub global_index: Decimal,
     pub execution_paused: bool,
     pub withdrawals_paused: bool,
     pub deposits_paused: bool,
@@ -178,12 +156,7 @@ pub struct FactoryStrategyInfoResponse {
     pub base_token: Addr,
     pub tvl: Uint128,
     pub performance_fee: Decimal,
-    pub reward_index: Decimal256,
-    pub extension_reward_index: Decimal256,
-    pub lm_reward_index: Decimal256,
-    pub last_distributed: u64,
     pub total_shares: Uint128,
-    pub reward_weight: Uint256,
     pub strategy_token: Option<Addr>,
 }
 
@@ -199,8 +172,6 @@ pub struct FactoryUserInfoResponse {
     pub id: u64,
     pub base_token_balance: Uint128,
     pub shares: Uint128,
-    pub lm_pending_reward: Uint128,
-    pub lm_reward_index: Decimal256,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -223,31 +194,6 @@ pub struct GetTvlResponse {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
-pub struct GetTotalCollectedFeesResponse {
-    pub total_collected_fees: Uint128,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
-pub struct GetExtensionTotalCollectedFeesResponse {
-    pub extension_total_collected_fees: Uint128,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
-pub struct GetTotalRewardWeightResponse {
-    pub total_reward_weight: Uint256,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
-pub struct GetTotalCfeRewardsResponse {
-    pub pending_reward: Uint128,
-    pub extension_pending_reward: Uint128,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum Cw20HookMsg {
@@ -259,16 +205,6 @@ pub struct StakerInfoResponse {
     pub staker: String,
     pub reward_index: Decimal,
     pub bond_amount: Uint128,
-    pub pending_reward: Uint128,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
-pub struct CfeRewards {
-    pub user: String,
-    pub strategy_id: u64,
-    pub pending_reward: Uint128,
-    pub extension_pending_reward: Uint128,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
