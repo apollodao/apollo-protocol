@@ -86,6 +86,12 @@ impl Asset {
         }
     }
 
+    /// ## Description
+    /// Implements Assets Into() trait 
+    /// ## Params
+    /// * **self** is the type of the caller object.
+    ///
+    /// * **assets** is the object of type [`Asset`]
     pub fn array_into<T>(assets: [Asset; 2]) -> [T; 2]
     where
         Asset: Into<T>,
@@ -93,6 +99,12 @@ impl Asset {
         [assets[0].clone().into(), assets[1].clone().into()]
     }
 
+        /// ## Description
+    /// Implements Assets From() trait 
+    /// ## Params
+    /// * **self** is the type of the caller object.
+    ///
+    /// * **assets** is the object of type [`Asset`]
     pub fn array_from<T>(assets: [T; 2]) -> [Asset; 2]
     where
         Asset: From<T>,
@@ -118,9 +130,15 @@ impl Asset {
 #[serde(rename_all = "snake_case")]
 pub enum AssetInfo {
     /// Token
-    Token { contract_addr: Addr },
+    Token {
+        /// contract [`Addr`] 
+        contract_addr: Addr 
+    },
     /// Native token
-    NativeToken { denom: String },
+    NativeToken { 
+        /// denom [`String`]
+        denom: String 
+    },
 }
 
 impl fmt::Display for AssetInfo {
@@ -172,8 +190,12 @@ impl TryInto<Addr> for AssetInfo {
     }
 }
 
+/// Balance Map
 pub const BALANCES: Map<&Addr, Uint128> = Map::new("balance");
+
+/// Implement [`AssetInfo`] functions
 impl AssetInfo {
+    /// Constructor
     pub fn new(api: &dyn Api, token: &str) -> Self {
         match api.addr_validate(token) {
             Ok(contract_addr) => AssetInfo::Token { contract_addr },
@@ -279,6 +301,10 @@ impl AssetInfo {
         Ok(())
     }
 
+    /// ## Description
+    /// Convert AssetInfo into an Addr.
+    /// ## Params
+    /// * **self** is the type of the caller object.
     pub fn to_addr(self) -> StdResult<Addr> {
         match self {
             AssetInfo::Token { contract_addr } => Ok(contract_addr),
@@ -288,16 +314,26 @@ impl AssetInfo {
         }
     }
 
-    // TODO: Why a Result when it always return a value and handle all errors?
+    /// ## Description
+    /// Implement From().
+    /// TODO: This function needs to be refactored
+    /// ## Params
+    /// * **self** is the type of the caller object.
     pub fn from_str(api: &dyn Api, str: &str) -> StdResult<Self> {
         match api.addr_validate(str) {
             Ok(contract_addr) => Ok(Self::Token { contract_addr }),
+            //TODO: Find a better way to find a NativeToken, this could include also failed str cases
             Err(_) => Ok(Self::NativeToken {
                 denom: str.to_string(),
             }),
         }
     }
 
+    /// ## Description
+    /// Convert an amount into [`Coin`].
+    /// ## Params
+    /// * **self** is the type of the caller object.
+    /// * **amount** token quantity
     pub fn to_coin(self, amount: Uint128) -> StdResult<Coin> {
         match self {
             AssetInfo::Token { .. } => Err(StdError::generic_err(
@@ -307,10 +343,22 @@ impl AssetInfo {
         }
     }
 
+    /// ## Description
+    /// Convert an amount into [`Asset`].
+    /// ## Params
+    /// * **self** is the type of the caller object.
+    /// * **amount** token quantity
     pub fn to_asset(self, amount: Uint128) -> Asset {
         Asset { info: self, amount }
     }
 
+    /// ## Description
+    /// Implements Assets Into() trait 
+    /// ## Params
+    /// * **self** is the type of the caller object.
+    ///
+    /// * **assets** is the object of type [`Asset`]
+    /// TODO: Repeated function
     pub fn array_into<T>(assets: [AssetInfo; 2]) -> [T; 2]
     where
         AssetInfo: Into<T>,
