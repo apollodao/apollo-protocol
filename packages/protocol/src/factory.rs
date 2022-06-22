@@ -79,8 +79,6 @@ pub enum ExecuteMsg {
     UpdateConfig {
         owner: Option<String>,
         warchest: Option<String>,
-        distribution_schedule: Option<Vec<(u64, u64, Uint128)>>,
-        genesis_time: Option<u64>,
     },
     ZapIntoStrategy {
         strategy_id: u64,
@@ -151,9 +149,6 @@ pub enum QueryMsg {
 pub struct FactoryConfig {
     pub owner: Addr,
     pub warchest: Addr,
-    // ( initial time , token distribution period, total distribution amount)
-    pub distribution_schedule: Vec<(u64, u64, Uint128)>,
-    pub genesis_time: u64,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -219,8 +214,6 @@ pub struct GetUserStrategiesResponse {
 pub struct GetConfigResponse {
     pub owner: Addr,
     pub warchest: Addr,
-    pub distribution_schedule: Vec<(u64, u64, Uint128)>,
-    pub genesis_time: u64,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
