@@ -203,7 +203,6 @@ pub enum Cw20HookMsg {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct StakerInfoResponse {
     pub staker: String,
-    pub reward_index: Decimal,
     pub bond_amount: Uint128,
 }
 
