@@ -21,7 +21,6 @@
 
 /// Asset definition and Asset traits and impl
 pub mod asset;
-
 /// Error Handling
 pub mod error;
 
