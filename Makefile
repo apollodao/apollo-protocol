@@ -66,7 +66,8 @@ fuzz_test:
 test:
 	RUST_BACKTRACE=1 cargo test -- --test-threads=10
 docs:
-	cargo doc --target-dir docs --color never --no-deps --open --workspace --exclude "cosmwasm*" --exclude "cw*" --exclude "terra*" --exclude "moneymarket" --exclude "anchor*" --exclude "mirror*" --release
+# --exclude "cosmwasm*"
+	rm -rf docs && cargo doc --target-dir docs --color never --no-deps --open --workspace --release
 
 audit:
 	cargo audit
