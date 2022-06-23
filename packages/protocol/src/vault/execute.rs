@@ -4,10 +4,11 @@ use crate::strategy::msg::PendingRewardsResponse;
 use crate::utils::round_half_to_even_256;
 use crate::{oracle::query_oracle_price, strategy::msg::StrategyInfo};
 use cosmwasm_std::{
-    from_binary, to_binary, Addr, CosmosMsg, Decimal256, DepsMut, Env, MessageInfo, QuerierWrapper,
-    QueryRequest, Response, StdError, StdResult, Storage, Uint128, WasmMsg, WasmQuery,
+    to_binary, CosmosMsg, Decimal256, DepsMut, Env, MessageInfo, QuerierWrapper, QueryRequest,
+    Response, StdResult, Storage, Uint128, WasmMsg, WasmQuery,
 };
 
+use super::state::VaultInfo;
 use super::{
     error::ContractError,
     msg::Cw4626ConfigOptions,
@@ -55,7 +56,7 @@ pub fn execute_unbond(
     // Perform withdraw on adaptor
     let unbond = CosmosMsg::Wasm(WasmMsg::Execute {
         contract_addr: adaptor_addr.to_string(),
-        msg: to_binary(&AdaptorExecuteMsg {
+        msg: to_binary(&AdaptorExecuteMsg::Withdraw {
             amount,
             recipient: env.contract.address.to_string(),
         })?,
@@ -69,7 +70,7 @@ pub fn calculate_shares(
     storage: &dyn Storage,
     querier: &QuerierWrapper,
     _env: &Env,
-    strategy_info: &StrategyInfo,
+    strategy_info: &VaultInfo,
     bonds: Uint128,
 ) -> StdResult<Uint128> {
     if strategy_info.total_bond_amount.is_zero() {

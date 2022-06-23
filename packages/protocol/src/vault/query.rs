@@ -1,21 +1,19 @@
 use std::convert::TryInto;
 
 use crate::vault::execute::calculate_shares;
-use crate::vault::msg::{
-    AprResponse, BaseConfig, ShouldExecuteResponse, StrategyInfo, TvlResponse, UserInfo,
-};
+
 use crate::vault::state::{BASE_DENOM, BASE_TOKEN, ORACLE};
 
-use apollo_protocol::{
-    adaptor::msg::QueryMsg as ProxyQueryMsg, oracle::query_oracle_price,
+use crate::{
+    adaptor::msg::QueryMsg as AdaptorQueryMsg, oracle::query_oracle_price,
     utils::calculate_user_bonds,
 };
-use cosmwasm_std::Uint256;
 use cosmwasm_std::{to_binary, Deps, Env, QueryRequest, StdResult, Uint128, WasmQuery};
+use cosmwasm_std::{Decimal, Uint256};
 
 use cw20_base::contract::{query_balance, query_token_info};
 
-use super::state::ADAPTOR;
+use super::state::{BaseVaultConfig, UserInfo, VaultInfo, ADAPTOR};
 
 /// Simulates a deposit into the strategy.
 ///
@@ -61,24 +59,28 @@ pub fn query_simulate_withdraw(deps: Deps, _env: &Env, amount: Uint128) -> StdRe
     Ok(base_tokens_to_withdraw)
 }
 
-//Query the total shares in the Strategy and total base_token amount in the Strategy
-pub fn query_strategy_info(deps: Deps) -> StdResult<StrategyInfo> {
+/// Query core info about the vault.
+///
+/// Returns:
+/// * Vault info as a [`VaultInfo`] struct.
+pub fn query_strategy_info(deps: Deps) -> StdResult<VaultInfo> {
     let proxy_addr = ADAPTOR.load(deps.storage)?;
 
     let total_bond_amount: Uint128 = deps.querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
         contract_addr: proxy_addr.to_string(),
-        msg: to_binary(&ProxyQueryMsg::TotalBondAmount {})?,
+        msg: to_binary(&AdaptorQueryMsg::TotalBondAmount {})?,
     }))?;
 
     let token_info = query_token_info(deps)?;
 
-    Ok(StrategyInfo {
+    Ok(VaultInfo {
         total_bond_amount,
         total_shares: token_info.total_supply,
         global_index: Default::default(),
     })
 }
 
+/// Query info about a users position in the vault. Returns info as a [`UserInfo`] struct.
 pub fn query_user_info(deps: Deps, address: String) -> StdResult<UserInfo> {
     let _user_addr = deps.api.addr_validate(address.as_str())?;
 
@@ -99,7 +101,10 @@ pub fn query_user_info(deps: Deps, address: String) -> StdResult<UserInfo> {
     })
 }
 
-pub fn query_tvl(deps: Deps, _env: Env) -> StdResult<TvlResponse> {
+// TODO: Should we move the TVL and APR calculations to the specific implementations, i.e. autocompound?
+//         That way the vault does not depend on the oracle. Instead the vault could handle the total_bond_amount
+//         and reward_rate queries. But not converting to APR or TVL.
+pub fn query_tvl(deps: Deps, _env: Env) -> StdResult<Uint128> {
     let oracle_addr = ORACLE.load(deps.storage)?;
     let asset_token = BASE_TOKEN.load(deps.storage)?;
     let proxy_addr = ADAPTOR.load(deps.storage)?;
@@ -107,7 +112,7 @@ pub fn query_tvl(deps: Deps, _env: Env) -> StdResult<TvlResponse> {
     let asset_token_price = query_oracle_price(
         &deps.querier,
         oracle_addr,
-        "uusd".to_string(), // TODO: Pass in value?
+        "uusd".to_string(), // TODO: UST used here...
         asset_token.to_string(),
         None, // TODO: Figure out where to store price age limit
     )?;
@@ -115,43 +120,35 @@ pub fn query_tvl(deps: Deps, _env: Env) -> StdResult<TvlResponse> {
     // Query the proxy contract for the total bond amount
     let amount: Uint128 = deps.querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
         contract_addr: proxy_addr.to_string(),
-        msg: to_binary(&ProxyQueryMsg::TotalBondAmount {})?,
+        msg: to_binary(&AdaptorQueryMsg::TotalBondAmount {})?,
     }))?;
 
     let tvl = Uint256::from(amount) * asset_token_price;
 
-    Ok(TvlResponse {
-        tvl: tvl.try_into()?,
-    })
+    Ok(tvl.try_into()?)
 }
 
-pub fn query_apr(deps: Deps) -> StdResult<AprResponse> {
-    let proxy_addr = ADAPTOR.load(deps.storage)?;
-    let oracle = ORACLE.load(deps.storage)?;
+pub fn query_apr(deps: Deps) -> StdResult<Decimal> {
+    let adaptor_addr = ADAPTOR.load(deps.storage)?;
 
-    let res: AprResponse = deps.querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
-        contract_addr: proxy_addr.to_string(),
-        msg: to_binary(&ProxyQueryMsg::Apr {
-            oracle,
+    deps.querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
+        contract_addr: adaptor_addr.to_string(),
+        msg: to_binary(&AdaptorQueryMsg::Apr {
             price_age_limit: 86400u64, // TODO: Figure out where to store price age limit
+            oracle: None,
         })?,
-    }))?;
-
-    Ok(res)
+    }))
 }
 
-pub fn query_should_execute(_deps: Deps, _cost: Uint128) -> StdResult<ShouldExecuteResponse> {
-    Ok(ShouldExecuteResponse {
-        should_execute: true,
-    })
+pub fn query_should_execute(_deps: Deps, _cost: Uint128) -> StdResult<bool> {
+    Ok(false)
 }
 
 // TODO - remove after migration
-pub fn query_base_config(deps: Deps) -> StdResult<BaseConfig> {
-    Ok(BaseConfig {
+pub fn query_base_config(deps: Deps) -> StdResult<BaseVaultConfig> {
+    Ok(BaseVaultConfig {
         base_token: BASE_TOKEN.load(deps.storage)?,
         base_denom: BASE_DENOM.load(deps.storage)?,
-        proxy: ADAPTOR.load(deps.storage)?,
-        oracle: ORACLE.load(deps.storage)?,
+        adaptor: ADAPTOR.load(deps.storage)?,
     })
 }
