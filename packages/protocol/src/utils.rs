@@ -11,6 +11,14 @@ use std::convert::{TryFrom, TryInto};
 use crate::error::ContractError;
 
 /// Authorization sanity
+pub fn only_allow_human_address(info: &MessageInfo, address: &Addr) -> Result<(), ContractError> {
+    if address != &info.sender {
+        return Err(ContractError::Unauthorized {});
+    }
+    Ok(())
+}
+
+/// Authorization sanity
 pub fn only_allow_address(
     api: &dyn Api,
     message_info: &MessageInfo,

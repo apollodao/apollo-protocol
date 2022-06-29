@@ -192,6 +192,21 @@ pub struct PoolReserves {
     pub amp: u64,
 }
 
+impl PoolReserves {
+    pub fn empty() -> Self {
+        Self {
+            pair_type: PairType::None {},
+            from: Asset::empty(),
+            to: Asset::empty(),
+            amp: 0,
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.pair_type.is_none() && self.from.is_empty() && self.to.is_empty() && self.amp == 0
+    }
+}
+
 // TODO - might be able to remove below, but keeping for now in case we can reuse
 /**
  *  --------- Astroport specific messages ----------

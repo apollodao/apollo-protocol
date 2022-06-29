@@ -17,6 +17,19 @@ pub struct Asset {
     pub amount: Uint128,
 }
 
+impl Asset {
+    pub fn empty() -> Self {
+        Asset {
+            info: AssetInfo::empty(),
+            amount: Uint128::zero(),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.info.is_empty() && self.amount.is_zero()
+    }
+}
+
 impl fmt::Display for Asset {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}{}", self.amount, self.info)
@@ -87,7 +100,7 @@ impl Asset {
     }
 
     /// ## Description
-    /// Implements Assets Into() trait 
+    /// Implements Assets Into() trait
     /// ## Params
     /// * **self** is the type of the caller object.
     ///
@@ -99,8 +112,8 @@ impl Asset {
         [assets[0].clone().into(), assets[1].clone().into()]
     }
 
-        /// ## Description
-    /// Implements Assets From() trait 
+    /// ## Description
+    /// Implements Assets From() trait
     /// ## Params
     /// * **self** is the type of the caller object.
     ///
@@ -131,14 +144,29 @@ impl Asset {
 pub enum AssetInfo {
     /// Token
     Token {
-        /// contract [`Addr`] 
-        contract_addr: Addr 
+        /// contract [`Addr`]
+        contract_addr: Addr,
     },
     /// Native token
-    NativeToken { 
+    NativeToken {
         /// denom [`String`]
-        denom: String 
+        denom: String,
     },
+}
+
+impl AssetInfo {
+    pub fn empty() -> Self {
+        AssetInfo::NativeToken {
+            denom: "".to_string(),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        match self {
+            AssetInfo::NativeToken { denom } => denom.is_empty(),
+            AssetInfo::Token { contract_addr } => contract_addr.as_str().is_empty(),
+        }
+    }
 }
 
 impl fmt::Display for AssetInfo {
@@ -353,7 +381,7 @@ impl AssetInfo {
     }
 
     /// ## Description
-    /// Implements Assets Into() trait 
+    /// Implements Assets Into() trait
     /// ## Params
     /// * **self** is the type of the caller object.
     ///

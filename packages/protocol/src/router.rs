@@ -112,7 +112,6 @@ pub enum QueryMsg {
     /// Get price of a pair (use verbose flag to get more info)
     Price {
         assets: [AssetInfo; 2],
-        dex_id: u16,
         /// Get more info on prices used to calculate the TWAP
         verbose: bool,
         /// Specify asset in pair to get the price of

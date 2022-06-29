@@ -53,6 +53,17 @@ pub enum PairType {
     Xyk {},
     /// Stable pair type
     Stable {},
+    /// No pair type (used by Router to price pairs of assets without an LP)
+    None {},
+}
+
+impl PairType {
+    pub fn is_none(&self) -> bool {
+        match self {
+            PairType::None {} => true,
+            _ => false,
+        }
+    }
 }
 
 /// ## Description
