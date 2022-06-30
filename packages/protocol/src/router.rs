@@ -9,8 +9,10 @@ use serde::{Deserialize, Serialize};
 /// This structure describes the basic settings for creating a contract.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct InstantiateMsg {
-    /// The apollo Factory contract address
+    /// Apollo Factory contract address
     pub apollo_factory: String,
+    /// Apollo Collector contract address
+    pub apollo_collector: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -60,6 +62,8 @@ pub enum ExecuteMsg {
         token: AssetInfo,
         recipient: Addr,
         amount: Option<Uint128>,
+        /// percentage of amount to send
+        amount_pct: Option<Decimal>,
         hook_msg: Option<Binary>,
     },
     /// Query pair reserves and record price/twap

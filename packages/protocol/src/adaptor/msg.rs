@@ -53,6 +53,7 @@ pub enum BaseDexAdaptorExecuteMsg<C = ()> {
         token: AssetInfo,
         recipient: Addr,
         amount: Option<Uint128>,
+        amount_pct: Option<Decimal>,
         hook_msg: Option<Binary>,
     },
     AddPair {
@@ -114,6 +115,7 @@ pub enum BaseDexAdaptorQueryMsg<A = ()> {
         from: AssetInfo,
         to: AssetInfo,
         amount: Uint128,
+        sender: String,
         max_spread: Option<Decimal>,
     },
     Adaptor(A),

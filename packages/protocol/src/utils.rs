@@ -312,16 +312,19 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
     info: MessageInfo,
     token: AssetInfo,
     amount: Option<Uint128>,
+    amount_pct: Option<Decimal>,
     recipient: Addr,
     hook_msg: Option<Binary>,
 ) -> Result<Response<T>, ContractError> {
     only_allow_address(deps.as_ref().api, &info, env.contract.address.as_str())?;
 
-    let amount = amount.unwrap_or_else(|| {
-        token
-            .query_balance(&deps.querier, env.contract.address.clone())
-            .unwrap_or_default()
-    });
+    let amount_pct = amount_pct.unwrap_or_else(|| Decimal::one());
+    let amount = amount_pct
+        * amount.unwrap_or_else(|| {
+            token
+                .query_balance(&deps.querier, env.contract.address.clone())
+                .unwrap_or_default()
+        });
 
     let funds = if token.is_native_token() {
         vec![Coin::new(amount.u128(), token.to_string())]

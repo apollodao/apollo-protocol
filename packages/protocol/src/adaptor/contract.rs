@@ -13,8 +13,11 @@ pub fn base_dex_execute<C, D: CustomQuery>(
             token,
             recipient,
             amount,
+            amount_pct,
             hook_msg,
-        } => execute_send_tokens(deps, env, info, token, amount, recipient, hook_msg),
+        } => execute_send_tokens(
+            deps, env, info, token, amount, amount_pct, recipient, hook_msg,
+        ),
         _ => todo!(),
     }
 }
