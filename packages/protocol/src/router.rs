@@ -1,7 +1,7 @@
-use apollo_asset::asset::AssetInfo;
 use apollo_asset::pair::PairType;
 use cosmwasm_std::{Addr, Binary, Decimal, Uint128};
 use cw20::Cw20ReceiveMsg;
+use cw_asset::AssetInfo;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
