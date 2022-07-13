@@ -260,7 +260,7 @@ pub enum BaseExecuteMsg<P = ()> {
         recipient: String,
     },
     Bond {},
-    UnBond {},
+    Unbond {},
     ClaimRewards {},
     SellRewards {
         max_spread: Option<Decimal>,
@@ -295,7 +295,10 @@ pub enum BaseLpExecuteMsg {
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum QueryMsg {
-    Apr { oracle: Addr, price_age_limit: u64 },
+    Apr {
+        oracle: Option<Addr>,
+        price_age_limit: u64,
+    },
     PendingRewards {},
     TotalBondAmount {},
 }

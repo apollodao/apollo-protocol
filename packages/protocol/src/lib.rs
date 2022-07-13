@@ -27,6 +27,8 @@
 pub mod adaptor;
 /// Revenue collector
 pub mod collector;
+/// Documentation
+pub mod docs;
 /// Error Handler
 pub mod error;
 /// Strategies factory
@@ -47,9 +49,8 @@ pub mod strategy;
 pub mod strategy_token;
 /// Utils
 pub mod utils;
-
-/// Documentation
-pub mod docs;
+/// Generic vault and strategy specific functions
+pub mod vault;
 
 #[cfg(test)]
 /// Unit Tests
