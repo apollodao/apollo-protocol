@@ -2,8 +2,8 @@ use apollo_asset::asset::AssetInfo;
 use cosmwasm_std::{
     to_binary, Addr, Api, BankMsg, Binary, CheckedFromRatioError, Coin, ConversionOverflowError,
     CosmosMsg, CustomQuery, Decimal, Decimal256, Deps, DepsMut, Empty, Env, Event, Fraction,
-    MessageInfo, QuerierWrapper, QueryRequest, Response, StdError, StdResult, Uint128, Uint256,
-    WasmMsg, WasmQuery,
+    MessageInfo, QuerierWrapper, QueryRequest, Reply, Response, StdError, StdResult,
+    SubMsgResponse, Uint128, Uint256, WasmMsg, WasmQuery,
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
 use std::convert::{TryFrom, TryInto};
@@ -367,6 +367,15 @@ pub fn parse_u8_key(data: &[u8]) -> Result<u8, ContractError> {
         Ok(bytes) => Ok(u8::from_be_bytes(bytes)),
         Err(_) => Err(ContractError::CorruptedData {}),
     }
+}
+
+/// Unwrap reply
+pub fn unwrap_reply(reply: &Reply) -> StdResult<SubMsgResponse> {
+    reply
+        .clone()
+        .result
+        .into_result()
+        .map_err(StdError::generic_err)
 }
 
 /// Init event
