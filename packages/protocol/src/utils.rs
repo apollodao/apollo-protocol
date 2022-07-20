@@ -1,4 +1,3 @@
-use apollo_asset::asset::AssetInfo;
 use cosmwasm_std::{
     to_binary, Addr, Api, BankMsg, Binary, CheckedFromRatioError, Coin, ConversionOverflowError,
     CosmosMsg, CustomQuery, Decimal, Decimal256, Deps, DepsMut, Empty, Env, Event, Fraction,
@@ -6,6 +5,7 @@ use cosmwasm_std::{
     SubMsgResponse, Uint128, Uint256, WasmMsg, WasmQuery,
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
+use cw_asset::AssetInfo;
 use std::convert::{TryFrom, TryInto};
 
 use crate::error::ContractError;
@@ -326,32 +326,28 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
                 .unwrap_or_default()
         });
 
-    let funds = if token.is_native_token() {
-        vec![Coin::new(amount.u128(), token.to_string())]
-    } else {
-        vec![]
+    let funds = match token {
+        AssetInfo::Native(_) => vec![Coin::new(amount.u128(), token.to_string())],
+        _ => vec![],
     };
 
     let send = match hook_msg {
-        Some(cw20_hook_msg) => {
-            if token.is_native_token() {
-                CosmosMsg::Wasm(WasmMsg::Execute {
-                    contract_addr: recipient.to_string(),
+        Some(cw20_hook_msg) => match token {
+            AssetInfo::Cw20(_) => CosmosMsg::Wasm(WasmMsg::Execute {
+                contract_addr: token.to_string(),
+                msg: to_binary(&Cw20ExecuteMsg::Send {
+                    contract: recipient.to_string(),
+                    amount,
                     msg: cw20_hook_msg,
-                    funds,
-                })
-            } else {
-                CosmosMsg::Wasm(WasmMsg::Execute {
-                    contract_addr: token.to_string(),
-                    msg: to_binary(&Cw20ExecuteMsg::Send {
-                        contract: recipient.to_string(),
-                        amount,
-                        msg: cw20_hook_msg,
-                    })?,
-                    funds,
-                })
-            }
-        }
+                })?,
+                funds,
+            }),
+            AssetInfo::Native(_) => CosmosMsg::Wasm(WasmMsg::Execute {
+                contract_addr: recipient.to_string(),
+                msg: cw20_hook_msg,
+                funds,
+            }),
+        },
         None => CosmosMsg::Bank(BankMsg::Send {
             to_address: recipient.to_string(),
             amount: funds,
