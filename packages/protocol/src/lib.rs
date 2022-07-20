@@ -39,8 +39,6 @@ pub mod legacy_vault;
 pub mod oracle;
 /// querier
 pub mod querier;
-/// router
-pub mod router;
 /// Strategy Trait
 pub mod strategy;
 /// Strategy Token
