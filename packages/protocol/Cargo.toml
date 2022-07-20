@@ -7,7 +7,7 @@ version = "0.11.0"
 [dependencies]
 apollo-asset = { path = "../asset" }
 cosmwasm-std = { version = "1.0.0", features = ["iterator"] }
-cw-asset = { rev = "162b82ace0fd2a38b301a3f5a923e9aa39bdbd1c", git = "https://github.com/apollodao/cw-asset.git"}
+cw-asset = { rev = "1b656cdd80ea9300a4003041c2fd12df9c6e72af", git = "https://github.com/apollodao/cw-asset.git"}
 cw-storage-plus = "0.13.4"
 cw20 = { version = "0.13.4" }
 cw20-base = { version = "0.13.4", features = ["library"] }
