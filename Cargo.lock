@@ -230,7 +230,7 @@ dependencies = [
 [[package]]
 name = "cw-asset"
 version = "2.1.0"
-source = "git+https://github.com/apollodao/cw-asset.git?rev=1b656cdd80ea9300a4003041c2fd12df9c6e72af#1b656cdd80ea9300a4003041c2fd12df9c6e72af"
+source = "git+https://github.com/apollodao/cw-asset.git?rev=fafac0755d040764c15417812280ce022dc05aea#fafac0755d040764c15417812280ce022dc05aea"
 dependencies = [
  "apollo-proto-rust 0.1.0 (git+https://github.com/apollodao/apollo-proto-rust?rev=7ff193c00fb63357d686c859eac89b40667050b5)",
  "cosmwasm-std",
