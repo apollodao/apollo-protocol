@@ -12,6 +12,7 @@ checksum = "08f9b8508dccb7687a1d6c4ce66b2b0ecef467c94667de27d8d7fe1f8d2a9cdc"
 name = "apollo-asset"
 version = "0.11.0"
 dependencies = [
+ "apollo-proto-rust 0.1.0 (git+https://github.com/apollodao/apollo-proto-rust.git?branch=master)",
  "cosmwasm-schema",
  "cosmwasm-std",
  "cw-multi-test",
@@ -22,6 +23,17 @@ dependencies = [
  "serde",
  "test-case",
  "thiserror",
+]
+
+[[package]]
+name = "apollo-proto-rust"
+version = "0.1.0"
+source = "git+https://github.com/apollodao/apollo-proto-rust.git?branch=master#935e15f94e2e0f3484572aeed650d6905784057d"
+dependencies = [
+ "cosmwasm-std",
+ "prost 0.10.4",
+ "prost-types",
+ "serde",
 ]
 
 [[package]]
@@ -220,7 +232,7 @@ name = "cw-asset"
 version = "2.1.0"
 source = "git+https://github.com/apollodao/cw-asset.git?rev=1b656cdd80ea9300a4003041c2fd12df9c6e72af#1b656cdd80ea9300a4003041c2fd12df9c6e72af"
 dependencies = [
- "apollo-proto-rust",
+ "apollo-proto-rust 0.1.0 (git+https://github.com/apollodao/apollo-proto-rust?rev=7ff193c00fb63357d686c859eac89b40667050b5)",
  "cosmwasm-std",
  "cw-storage-plus",
  "cw20",

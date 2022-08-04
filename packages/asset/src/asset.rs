@@ -1,11 +1,12 @@
 use crate::querier::{query_balance, query_token_balance, query_token_symbol};
+use apollo_proto_rust::cosmos::base::v1beta1::Coin as ProtoCoin;
 use cosmwasm_std::{
     Addr, Api, Coin, CustomQuery, MessageInfo, QuerierWrapper, StdError, StdResult, Uint128,
 };
 use cw_storage_plus::Map;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::{convert::TryInto, fmt};
+use std::{convert::TryInto, fmt, str::FromStr};
 
 /// ## Description
 /// This enum describes asset.
@@ -56,6 +57,33 @@ impl TryInto<Coin> for Asset {
             AssetInfo::NativeToken { denom } => Ok(Coin {
                 denom,
                 amount: self.amount,
+            }),
+        }
+    }
+}
+
+impl From<ProtoCoin> for Asset {
+    fn from(proto_coin: ProtoCoin) -> Self {
+        Self {
+            info: AssetInfo::NativeToken {
+                denom: proto_coin.denom,
+            },
+            amount: Uint128::from_str(&proto_coin.amount).unwrap(),
+        }
+    }
+}
+
+impl TryInto<ProtoCoin> for Asset {
+    type Error = StdError;
+
+    fn try_into(self) -> StdResult<ProtoCoin> {
+        match self.info {
+            AssetInfo::Token { .. } => Err(StdError::generic_err(
+                "Cannot convert an non-native token to ProtoCoin.",
+            )),
+            AssetInfo::NativeToken { denom } => Ok(ProtoCoin {
+                denom,
+                amount: self.amount.to_string(),
             }),
         }
     }
@@ -187,6 +215,14 @@ impl From<Addr> for AssetInfo {
 impl From<Coin> for AssetInfo {
     fn from(coin: Coin) -> Self {
         Self::NativeToken { denom: coin.denom }
+    }
+}
+
+impl From<ProtoCoin> for AssetInfo {
+    fn from(proto_coin: ProtoCoin) -> Self {
+        Self::NativeToken {
+            denom: proto_coin.denom,
+        }
     }
 }
 
@@ -368,6 +404,23 @@ impl AssetInfo {
                 "Cannot convert an non-native token to Coin.",
             )),
             AssetInfo::NativeToken { denom } => Ok(Coin { denom, amount }),
+        }
+    }
+
+    /// ## Description
+    /// Convert an amount into [`ProtoCoin`].
+    /// ## Params
+    /// * **self** is the type of the caller object.
+    /// * **amount** token quantity
+    pub fn to_proto_coin(self, amount: Uint128) -> StdResult<ProtoCoin> {
+        match self {
+            AssetInfo::Token { .. } => Err(StdError::generic_err(
+                "Cannot convert an non-native token to ProtoCoin.",
+            )),
+            AssetInfo::NativeToken { denom } => Ok(ProtoCoin {
+                denom,
+                amount: amount.to_string(),
+            }),
         }
     }
 

@@ -1,6 +1,4 @@
-use cosmwasm_std::{
-    Addr, Binary, Decimal, Decimal256, Order, StdError, StdResult, Storage, Uint128, Uint256,
-};
+use cosmwasm_std::{Addr, Binary, Decimal, Order, StdError, StdResult, Storage, Uint128};
 use cw20::Cw20ReceiveMsg;
 use cw_storage_plus::{Item, Map};
 use schemars::JsonSchema;
