@@ -382,11 +382,11 @@ pub fn parse_contract_addr_from_instantiate_event(
     Ok(deps.api.addr_validate(
         &events
             .into_iter()
-            .find(|e| e.ty == "instantiate_contract")
+            .find(|e| e.ty == "instantiate")
             .and_then(|ev| {
                 ev.attributes
                     .into_iter()
-                    .find(|a| a.key == "contract_address")
+                    .find(|a| a.key == "_contract_addr")
             })
             .unwrap()
             .value,
