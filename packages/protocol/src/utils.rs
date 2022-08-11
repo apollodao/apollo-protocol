@@ -1,10 +1,12 @@
 use cosmwasm_std::{
-    to_binary, Addr, Api, BankMsg, Binary, CheckedFromRatioError, Coin, ConversionOverflowError,
-    CosmosMsg, CustomQuery, Decimal, Decimal256, Deps, DepsMut, Empty, Env, Event, Fraction,
-    MessageInfo, QuerierWrapper, QueryRequest, Reply, Response, StdError, StdResult,
-    SubMsgResponse, Uint128, Uint256, WasmMsg, WasmQuery,
+    to_binary, Addr, Api, BalanceResponse, BankMsg, BankQuery, Binary, CheckedFromRatioError, Coin,
+    ConversionOverflowError, CosmosMsg, CustomQuery, Decimal, Decimal256, Deps, DepsMut, Empty,
+    Env, Event, Fraction, MessageInfo, QuerierWrapper, QueryRequest, Reply, Response, StdError,
+    StdResult, SubMsgResponse, Uint128, Uint256, WasmMsg, WasmQuery,
 };
-use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse};
+use cw20::{
+    BalanceResponse as Cw20BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, TokenInfoResponse,
+};
 use cw_asset::AssetInfo;
 use std::convert::{TryFrom, TryInto};
 
@@ -290,14 +292,14 @@ pub fn query_token_balance(
     contract_addr: Addr,
     account_addr: Addr,
 ) -> StdResult<Uint128> {
-    let res: BalanceResponse = querier
+    let res = querier
         .query(&QueryRequest::Wasm(WasmQuery::Smart {
             contract_addr: contract_addr.to_string(),
             msg: to_binary(&Cw20QueryMsg::Balance {
                 address: account_addr.to_string(),
             })?,
         }))
-        .unwrap_or_else(|_| BalanceResponse {
+        .unwrap_or_else(|_| Cw20BalanceResponse {
             balance: Uint128::zero(),
         });
 
@@ -321,9 +323,7 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
     let amount_pct = amount_pct.unwrap_or_else(|| Decimal::one());
     let amount = amount_pct
         * amount.unwrap_or_else(|| {
-            token
-                .query_balance(&deps.querier, env.contract.address.clone())
-                .unwrap_or_default()
+            query_balance(&deps.querier, &token, env.contract.address.clone()).unwrap_or_default()
         });
 
     let funds = match token {
@@ -347,6 +347,7 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
                 msg: cw20_hook_msg,
                 funds,
             }),
+            AssetInfo::Cw1155(_, _) => unimplemented!(),
         },
         None => CosmosMsg::Bank(BankMsg::Send {
             to_address: recipient.to_string(),
@@ -397,14 +398,14 @@ pub fn parse_contract_addr_from_instantiate_event(
 pub fn decimal256_to_decimal(decimal: Decimal256) -> StdResult<Decimal> {
     let atomics: Uint128 = decimal.atomics().try_into()?;
     Ok(Decimal::from_atomics(atomics, decimal.decimal_places())
-        .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
+        .map_err(|e| StdError::generic_err(&format!("{:?}", e)))?)
 }
 
 /// Decimal to Decimal256 conversion
 pub fn decimal_to_decimal256(decimal: Decimal) -> StdResult<Decimal256> {
     let atomics: Uint128 = decimal.atomics();
     Ok(Decimal256::from_atomics(atomics, decimal.decimal_places())
-        .map_err(|e| StdError::generic_err(&format!("{}", e)))?)
+        .map_err(|e| StdError::generic_err(&format!("{:?}", e)))?)
 }
 
 /// Scheduling validation
@@ -429,4 +430,46 @@ pub fn validate_distribution_schedule(
     }
 
     Ok(())
+}
+
+// TODO - below is taken from https://github.com/mars-protocol/cw-asset.git
+//      - modified to support passing a custom querier
+//      - raise PR in cw-asset repo to remove need for below
+/// Query an address' balance of the asset
+///
+/// ```rust
+/// use cosmwasm_std::{Addr, Deps, StdResult, Uint128};
+/// use cw_asset::AssetInfo;
+/// use apollo_protocol::utils::query_balance;
+///
+/// fn query_uusd_balance(deps: Deps, asset_info: &AssetInfo, account_addr: &Addr) -> StdResult<Uint128> {
+///     query_balance(&deps.querier, asset_info, account_addr)
+/// }
+/// ```
+pub fn query_balance<T: Into<String>, Q: CustomQuery>(
+    querier: &QuerierWrapper<Q>,
+    asset_info: &AssetInfo,
+    address: T,
+) -> StdResult<Uint128> {
+    match asset_info {
+        AssetInfo::Cw20(contract_addr) => {
+            let response: Cw20BalanceResponse =
+                querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
+                    contract_addr: contract_addr.into(),
+                    msg: to_binary(&Cw20QueryMsg::Balance {
+                        address: address.into(),
+                    })?,
+                }))?;
+            Ok(response.balance)
+        }
+        AssetInfo::Native(denom) => {
+            let response: BalanceResponse =
+                querier.query(&QueryRequest::Bank(BankQuery::Balance {
+                    address: address.into(),
+                    denom: denom.clone(),
+                }))?;
+            Ok(response.amount.amount)
+        }
+        AssetInfo::Cw1155(_, _) => unimplemented!(),
+    }
 }

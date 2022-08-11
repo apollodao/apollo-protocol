@@ -23,8 +23,6 @@
 //!
 //! **See module docs**
 
-/// Interface Adapter Layer
-pub mod adaptor;
 /// Revenue collector
 pub mod collector;
 /// Error Handler

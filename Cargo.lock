@@ -12,7 +12,7 @@ checksum = "08f9b8508dccb7687a1d6c4ce66b2b0ecef467c94667de27d8d7fe1f8d2a9cdc"
 name = "apollo-asset"
 version = "0.11.0"
 dependencies = [
- "apollo-proto-rust 0.1.0 (git+https://github.com/apollodao/apollo-proto-rust.git?branch=master)",
+ "apollo-proto-rust",
  "cosmwasm-schema",
  "cosmwasm-std",
  "cw-multi-test",
@@ -29,17 +29,6 @@ dependencies = [
 name = "apollo-proto-rust"
 version = "0.1.0"
 source = "git+https://github.com/apollodao/apollo-proto-rust.git?branch=master#935e15f94e2e0f3484572aeed650d6905784057d"
-dependencies = [
- "cosmwasm-std",
- "prost 0.10.4",
- "prost-types",
- "serde",
-]
-
-[[package]]
-name = "apollo-proto-rust"
-version = "0.1.0"
-source = "git+https://github.com/apollodao/apollo-proto-rust?rev=7ff193c00fb63357d686c859eac89b40667050b5#7ff193c00fb63357d686c859eac89b40667050b5"
 dependencies = [
  "cosmwasm-std",
  "prost 0.10.4",
@@ -229,17 +218,15 @@ dependencies = [
 
 [[package]]
 name = "cw-asset"
-version = "2.1.0"
-source = "git+https://github.com/apollodao/cw-asset.git?rev=fafac0755d040764c15417812280ce022dc05aea#fafac0755d040764c15417812280ce022dc05aea"
+version = "2.2.0"
+source = "git+https://github.com/mars-protocol/cw-asset.git?tag=v2.2.0#18af52816e552027f2526a13c9d158ae1052f4e6"
 dependencies = [
- "apollo-proto-rust 0.1.0 (git+https://github.com/apollodao/apollo-proto-rust?rev=7ff193c00fb63357d686c859eac89b40667050b5)",
  "cosmwasm-std",
  "cw-storage-plus",
+ "cw1155",
  "cw20",
- "cw20-base",
  "schemars",
  "serde",
- "thiserror",
 ]
 
 [[package]]
@@ -282,6 +269,18 @@ dependencies = [
  "schemars",
  "serde",
  "thiserror",
+]
+
+[[package]]
+name = "cw1155"
+version = "0.13.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42197c9a0fd844653177009125f24157e486578289327a3781923e427a8f9bbc"
+dependencies = [
+ "cosmwasm-std",
+ "cw-utils",
+ "schemars",
+ "serde",
 ]
 
 [[package]]
