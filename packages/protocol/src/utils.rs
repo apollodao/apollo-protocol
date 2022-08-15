@@ -387,7 +387,7 @@ pub fn parse_contract_addr_from_instantiate_event(
             .and_then(|ev| {
                 ev.attributes
                     .into_iter()
-                    .find(|a| a.key == "_contract_addr")
+                    .find(|a| a.key == "_contract_address")
             })
             .unwrap()
             .value,
