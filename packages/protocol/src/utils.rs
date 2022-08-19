@@ -326,15 +326,15 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
             query_balance(&deps.querier, &token, env.contract.address.clone()).unwrap_or_default()
         });
 
-    let funds = match token {
-        AssetInfo::Native(_) => vec![Coin::new(amount.u128(), token.to_string())],
+    let funds = match &token {
+        AssetInfo::Native(denom) => vec![Coin::new(amount.u128(), denom)],
         _ => vec![],
     };
 
     let send = match hook_msg {
-        Some(cw20_hook_msg) => match token {
-            AssetInfo::Cw20(_) => CosmosMsg::Wasm(WasmMsg::Execute {
-                contract_addr: token.to_string(),
+        Some(cw20_hook_msg) => match &token {
+            AssetInfo::Cw20(contract_addr) => CosmosMsg::Wasm(WasmMsg::Execute {
+                contract_addr: contract_addr.to_string(),
                 msg: to_binary(&Cw20ExecuteMsg::Send {
                     contract: recipient.to_string(),
                     amount,
