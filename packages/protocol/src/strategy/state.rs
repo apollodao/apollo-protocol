@@ -11,7 +11,7 @@ pub const STAKING_ADAPTOR: Item<Addr> = Item::new("staking_adaptor");
 pub const FACTORY: Item<Addr> = Item::new("factory");
 pub const ORACLE: Item<Addr> = Item::new("oracle");
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // config struct stored in / read from cw_4626 storage
 pub struct BaseConfig {
@@ -23,7 +23,7 @@ pub struct BaseConfig {
     pub oracle: Addr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // config response
 pub struct ConfigResponse<C> {

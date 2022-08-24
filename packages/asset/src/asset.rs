@@ -10,7 +10,7 @@ use std::{convert::TryInto, fmt, str::FromStr};
 
 /// ## Description
 /// This enum describes asset.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct Asset {
     /// the available type of asset from [`AssetInfo`]
     pub info: AssetInfo,
@@ -167,7 +167,7 @@ impl Asset {
 /// Token { contract_addr: Addr::unchecked("terra...") };
 /// NativeToken { denom: String::from("uluna") };
 /// ```
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema, PartialOrd)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema, PartialOrd)]
 #[serde(rename_all = "snake_case")]
 pub enum AssetInfo {
     /// Token
@@ -232,14 +232,23 @@ impl From<Asset> for AssetInfo {
     }
 }
 
-impl Into<Option<Addr>> for AssetInfo {
-    fn into(self) -> Option<Addr> {
-        match self {
+impl From<AssetInfo> for Option<Addr> {
+    fn from(val: AssetInfo) -> Self {
+        match val {
             AssetInfo::Token { contract_addr } => Some(contract_addr),
             AssetInfo::NativeToken { denom: _ } => None,
         }
     }
 }
+
+// impl Into<Option<Addr>> for AssetInfo {
+//     fn into(self) -> Option<Addr> {
+//         match self {
+//             AssetInfo::Token { contract_addr } => Some(contract_addr),
+//             AssetInfo::NativeToken { denom: _ } => None,
+//         }
+//     }
+// }
 
 impl TryInto<Addr> for AssetInfo {
     type Error = StdError;
@@ -478,16 +487,15 @@ pub fn format_lp_token_name(
 ) -> StdResult<String> {
     let mut short_symbols: Vec<String> = vec![];
     for asset_info in asset_infos {
-        let short_symbol: String;
-        match asset_info {
+        let short_symbol: String = match asset_info {
             AssetInfo::NativeToken { denom } => {
-                short_symbol = denom.chars().take(TOKEN_SYMBOL_MAX_LENGTH).collect();
+                denom.chars().take(TOKEN_SYMBOL_MAX_LENGTH).collect()
             }
-            AssetInfo::Token { contract_addr } => {
-                let token_symbol = query_token_symbol(querier, contract_addr)?;
-                short_symbol = token_symbol.chars().take(TOKEN_SYMBOL_MAX_LENGTH).collect();
-            }
-        }
+            AssetInfo::Token { contract_addr } => query_token_symbol(querier, contract_addr)?
+                .chars()
+                .take(TOKEN_SYMBOL_MAX_LENGTH)
+                .collect(),
+        };
         short_symbols.push(short_symbol);
     }
     Ok(format!("{}-{}-LP", short_symbols[0], short_symbols[1]).to_uppercase())

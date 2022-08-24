@@ -1,0 +1,32 @@
+name: check-semver
+
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  version_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Add SSH key file
+        run: |
+            mkdir -p /home/runner/.ssh
+            echo "${{ secrets.SSH_PRIVATE_KEY }}" > /home/runner/.ssh/id_rsa
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            override: true
+            components: rustfmt, clippy
+      - name: Install cargo-cvm
+        uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-cvm
+          version: latest
+      - name: Check Versions
+        run: cargo cvm -x -k /home/runner/.ssh/id_rsa -s patch

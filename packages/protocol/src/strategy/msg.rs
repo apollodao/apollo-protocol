@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 pub type QueryMsg = BaseStrategyQueryMsg<()>;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum BaseStrategyQueryMsg<S> {
@@ -25,7 +25,7 @@ pub enum BaseStrategyQueryMsg<S> {
     Strategy(S),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct StrategyInfo {
     pub total_bond_amount: Uint128,
@@ -33,7 +33,7 @@ pub struct StrategyInfo {
     pub global_index: Decimal, // TODO - remove this after migration, legacy
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // user info struct returned by queries
 pub struct UserInfo {
@@ -42,33 +42,33 @@ pub struct UserInfo {
     pub index: Decimal, // TODO - remove this after migration, legacy
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct ShouldExecuteResponse {
     pub should_execute: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct TvlResponse {
     pub tvl: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct AprResponse {
     pub apr: Decimal256,
 }
 
 // TODO - move these to a proxy folder
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct PendingRewardsResponse {
     pub pending_rewards: Vec<PendingRewardsItem>,
     pub total_value: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct PendingRewardsItem {
     pub reward_token: Asset,
@@ -78,7 +78,7 @@ pub struct PendingRewardsItem {
 pub type ExecuteMsg = BaseStrategyExecuteMsg<()>;
 
 // TODO: Switch to using Addr
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum BaseStrategyExecuteMsg<S> {
@@ -89,7 +89,7 @@ pub enum BaseStrategyExecuteMsg<S> {
     Strategy(S),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct InstantiateMsg {
     pub base_denom: AssetInfo,

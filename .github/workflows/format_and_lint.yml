@@ -1,0 +1,33 @@
+name: Format and linting check
+
+on:
+  pull_request:
+    branches: ["master", "develop"]
+
+env:
+  CARGO_TERM_COLOR: always
+  user: apollodao-ci
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Git credentials
+        uses: de-vri-es/setup-git-credentials@v2.0.8
+        with:
+          credentials: https://${{ env.user }}:${{ secrets.APOLLO_CI_PAT }}@github.com/
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.APOLLO_CI_PAT }}
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            override: true
+            components: rustfmt, clippy
+      - name: Lint with clippy
+        run: make clippy_fail_on_warnings
+      - name: Run format check with rustfmt
+        run: make format_check

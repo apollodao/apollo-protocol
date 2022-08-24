@@ -1,24 +1,21 @@
-use std::convert::TryFrom;
-
-use cosmwasm_std::{
-    to_binary, Addr, Deps, Env, QueryRequest, StdResult, Uint128, Uint256, WasmQuery,
-};
+use cosmwasm_std::{Addr, Deps, Env, StdResult, Uint128};
 
 use super::{
     msg::{AprResponse, ShouldExecuteResponse, StrategyInfo, TvlResponse, UserInfo},
     state::{BASE_TOKEN, ORACLE, STAKING_ADAPTOR, STRATEGY_TOKEN},
 };
 
-use crate::{
-    oracle::query_oracle_price,
-    utils::{calculate_user_bonds, query_token_balance},
-};
+use crate::utils::{calculate_user_bonds, query_token_balance};
 use crate::{
     querier::query_cw20_token_info,
     strategy::state::{BaseConfig, BASE_DENOM, FACTORY},
 };
 
-pub fn query_total_bond_amount(deps: Deps, env: &Env, token: Option<Addr>) -> StdResult<Uint128> {
+pub fn query_total_bond_amount(
+    _deps: Deps,
+    _env: &Env,
+    _token: Option<Addr>,
+) -> StdResult<Uint128> {
     todo!()
     // let adaptor_addr = STAKING_ADAPTOR.load(deps.storage)?;
     //
@@ -76,7 +73,7 @@ pub fn query_user_info(
     })
 }
 
-pub fn query_tvl(deps: Deps, _env: Env) -> StdResult<TvlResponse> {
+pub fn query_tvl(_deps: Deps, _env: Env) -> StdResult<TvlResponse> {
     todo!()
     // let oracle_addr = ORACLE.load(deps.storage)?;
     // let asset_token = BASE_TOKEN.load(deps.storage)?;
@@ -108,7 +105,7 @@ pub fn query_tvl(deps: Deps, _env: Env) -> StdResult<TvlResponse> {
     // })
 }
 
-pub fn query_apr(deps: Deps) -> StdResult<AprResponse> {
+pub fn query_apr(_deps: Deps) -> StdResult<AprResponse> {
     todo!()
     // let proxy_addr = STAKING_ADAPTOR.load(deps.storage)?;
     // let oracle = ORACLE.load(deps.storage)?;

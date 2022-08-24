@@ -1,4 +1,4 @@
-#![warn(missing_docs)]
+// #![warn(missing_docs)]
 #![doc(html_logo_url = "../../../uml/logo.jpg")]
 //! # Apollo Protocol
 //!

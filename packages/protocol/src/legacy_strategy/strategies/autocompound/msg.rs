@@ -6,7 +6,7 @@ use cw20::Cw20ReceiveMsg;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct AutoCompoundInstantiateMsg {
     pub apollo_factory: String,        //The Apollo Factory contract
@@ -58,7 +58,7 @@ pub enum AutoCompoundExecuteMsg {
     Vault(VaultExecuteMsg),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct AutoCompoundMigrateMsg {
     pub oracle_contract: String,
@@ -66,7 +66,7 @@ pub struct AutoCompoundMigrateMsg {
     pub terraswap_router: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // config struct stored in / read from cw_4626 storage
 pub struct AutoCompoundConfig {
@@ -85,7 +85,7 @@ pub struct AutoCompoundConfig {
     pub farm_factory_contract: CanonicalAddr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // used in response from config query
 pub struct AutoCompoundConfigResponse {
@@ -104,7 +104,7 @@ pub struct AutoCompoundConfigResponse {
     pub farm_factory_contract: Addr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // used as input to update config
 pub struct AutoCompoundConfigOptions {

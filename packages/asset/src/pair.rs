@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// ## Description
 /// This structure describes the main controls configs of pair
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct PairInfo {
     /// asset infos of assets in pair, available in [`AssetInfo`]
     pub asset_infos: [AssetInfo; 2],
@@ -46,7 +46,7 @@ impl PairInfo {
 
 /// ## Description
 /// This structure describes Pair types
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum PairType {
     /// XYK pair type
@@ -59,10 +59,7 @@ pub enum PairType {
 
 impl PairType {
     pub fn is_none(&self) -> bool {
-        match self {
-            PairType::None {} => true,
-            _ => false,
-        }
+        matches!(self, PairType::None {})
     }
 }
 
