@@ -37,6 +37,9 @@ clean:
 format:
 	cargo fmt
 
+format_check:
+	cargo fmt --check
+
 dep:
 	cargo tree
 	cargo outdated
