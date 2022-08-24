@@ -53,6 +53,9 @@ spellcheck:
 	cargo spellcheck check
 # cargo spellcheck fix
 
+clippy_fail_on_warnings:
+	cargo clippy -- -D warnings -A clippy::large_enum_variant -A clippy::too_many_arguments
+
 clippy:
 	cargo clippy -- -A clippy::large_enum_variant -A clippy::too_many_arguments
 
