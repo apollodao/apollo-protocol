@@ -86,7 +86,6 @@ pub fn round_half_to_even_128(a: Decimal) -> Uint128 {
     let fraction_unit = Decimal::one().numerator();
     let truncated = (numerator / fraction_unit) * fraction_unit;
     let remainder = numerator - truncated;
-    let result;
 
     //Round up if remainder is > 0.5 or if remainder is exactly 0.5 and truncated is odd
     //Else, round down
@@ -95,13 +94,11 @@ pub fn round_half_to_even_128(a: Decimal) -> Uint128 {
         || remainder > fraction_unit / Uint128::new(2)
     {
         //round up
-        result = (truncated + fraction_unit) / fraction_unit;
+        (truncated + fraction_unit) / fraction_unit
     } else {
         //round down
-        result = truncated / fraction_unit;
+        truncated / fraction_unit
     }
-
-    result
 }
 
 /// Rounding up or down
@@ -110,7 +107,6 @@ pub fn round_half_to_even_256(a: Decimal256) -> Uint256 {
     let fraction_unit = Decimal256::one().numerator();
     let truncated = (numerator / fraction_unit) * fraction_unit;
     let remainder = numerator - truncated;
-    let result;
 
     //Round up if remainder is > 0.5 or if remainder is exactly 0.5 and truncated is odd
     //Else, round down
@@ -119,13 +115,11 @@ pub fn round_half_to_even_256(a: Decimal256) -> Uint256 {
         || remainder > fraction_unit / Uint256::from_u128(2u128)
     {
         //round up
-        result = (truncated + fraction_unit) / fraction_unit;
+        (truncated + fraction_unit) / fraction_unit
     } else {
         //round down
-        result = truncated / fraction_unit;
+        truncated / fraction_unit
     }
-
-    result
 }
 
 // pub fn simulate_routed_swap(
@@ -220,11 +214,11 @@ pub fn calculate_user_bonds(
     if total_shares.is_zero() {
         return Ok(Uint128::zero());
     }
-    Ok(Uint128::try_from(
+    Uint128::try_from(
         (Decimal256::raw(total_bond_amount.u128())
             * Decimal256::from_ratio(shares.u128(), total_shares.u128()))
         .atomics(),
-    )?)
+    )
 }
 
 // // generate swap messages for sending all sent funds to denom
@@ -320,7 +314,7 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
 ) -> Result<Response<T>, ContractError> {
     only_allow_address(deps.as_ref().api, &info, env.contract.address.as_str())?;
 
-    let amount_pct = amount_pct.unwrap_or_else(|| Decimal::one());
+    let amount_pct = amount_pct.unwrap_or_else(Decimal::one);
     let amount = amount_pct
         * amount.unwrap_or_else(|| {
             query_balance(&deps.querier, &token, env.contract.address.clone()).unwrap_or_default()
@@ -397,22 +391,22 @@ pub fn parse_contract_addr_from_instantiate_event(
 /// Decimal256 to Decimal conversion
 pub fn decimal256_to_decimal(decimal: Decimal256) -> StdResult<Decimal> {
     let atomics: Uint128 = decimal.atomics().try_into()?;
-    Ok(Decimal::from_atomics(atomics, decimal.decimal_places())
-        .map_err(|e| StdError::generic_err(&format!("{:?}", e)))?)
+    Decimal::from_atomics(atomics, decimal.decimal_places())
+        .map_err(|e| StdError::generic_err(&format!("{:?}", e)))
 }
 
 /// Decimal to Decimal256 conversion
 pub fn decimal_to_decimal256(decimal: Decimal) -> StdResult<Decimal256> {
     let atomics: Uint128 = decimal.atomics();
-    Ok(Decimal256::from_atomics(atomics, decimal.decimal_places())
-        .map_err(|e| StdError::generic_err(&format!("{:?}", e)))?)
+    Decimal256::from_atomics(atomics, decimal.decimal_places())
+        .map_err(|e| StdError::generic_err(&format!("{:?}", e)))
 }
 
 /// Scheduling validation
 pub fn validate_distribution_schedule(
     schedule: &Vec<(u64, u64, Uint128)>,
 ) -> Result<(), ContractError> {
-    if schedule.len() == 0 {
+    if schedule.is_empty() {
         return Err(ContractError::EmptyDistributionSchedule {});
     }
 

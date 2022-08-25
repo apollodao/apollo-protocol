@@ -121,7 +121,7 @@ pub fn query_apollo_dex_adaptor_by_id(
     dex_adaptor_id: u8,
 ) -> Option<Addr> {
     APOLLO_DEX_ADAPTORS
-        .query(querier, apollo_factory.clone(), dex_adaptor_id.into())
+        .query(querier, apollo_factory.clone(), dex_adaptor_id)
         .ok()?
 }
 
@@ -133,9 +133,7 @@ pub fn query_apollo_dex_adaptor_by_addr(
 ) -> StdResult<u8> {
     let dex_count = APOLLO_DEX_COUNT.query(querier, apollo_factory_addr.clone())?;
     for i in 1..=dex_count {
-        if let Some(found) =
-            APOLLO_DEX_ADAPTORS.query(querier, apollo_factory_addr.clone(), i.into())?
-        {
+        if let Some(found) = APOLLO_DEX_ADAPTORS.query(querier, apollo_factory_addr.clone(), i)? {
             if &found == dex_adaptor_addr {
                 return Ok(i);
             }

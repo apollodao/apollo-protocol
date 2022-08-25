@@ -3,7 +3,7 @@ use cosmwasm_std::{Addr, Decimal};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct InstantiateMsg {
     pub owner: String,
@@ -16,7 +16,7 @@ pub struct InstantiateMsg {
     pub anchor_market: String, //Anchor MoneyMarket Market contract
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum ExecuteMsg {
@@ -34,14 +34,14 @@ pub enum ExecuteMsg {
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum QueryMsg {
     Config {},
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct ConfigResponse {
     pub owner: Addr,
@@ -55,7 +55,7 @@ pub struct ConfigResponse {
     pub anchor_market: Addr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct MigrateMsg {
     pub target_assets: Vec<Asset>,

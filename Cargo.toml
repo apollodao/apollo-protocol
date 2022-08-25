@@ -1,7 +1,8 @@
 [workspace]
 exclude = []
 members = [
-  "packages/*",
+  "packages/asset",
+  "packages/protocol",
 ]
 
 [profile.release]

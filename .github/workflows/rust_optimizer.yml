@@ -1,0 +1,30 @@
+name: Rust Optimizer
+
+on:
+  pull_request:
+    branches: [ "master", "develop" ]
+
+env:
+  CARGO_TERM_COLOR: always
+  GIT_CREDENTIALS: https://apollodao-ci:${{ secrets.APOLLO_CI_PAT }}@github.com/
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.APOLLO_CI_PAT }}
+      - name: Get repo name
+        run: echo "REPO_NAME=$(basename ${{ github.workspace }})" >> $GITHUB_ENV
+      - name: Rust Optimizer
+        uses: addnab/docker-run-action@v3
+        with:
+          image: cosmwasm/rust-optimizer:0.12.6
+          options: |
+            -e GIT_CREDENTIALS --rm
+            -v ${{ github.workspace }}:/code
+            --mount type=volume,source=${{ env.REPO_NAME }}_cache,target=/code/target
+            --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry

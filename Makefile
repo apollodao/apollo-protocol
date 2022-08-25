@@ -37,6 +37,9 @@ clean:
 format:
 	cargo fmt
 
+format_check:
+	cargo fmt --check
+
 dep:
 	cargo tree
 	cargo outdated
@@ -51,7 +54,10 @@ changelog:
 
 spellcheck:
 	cargo spellcheck check
-	# cargo spellcheck fix
+# cargo spellcheck fix
+
+clippy_fail_on_warnings:
+	cargo clippy -- -D warnings -A clippy::large_enum_variant -A clippy::too_many_arguments
 
 clippy:
 	cargo clippy -- -A clippy::large_enum_variant -A clippy::too_many_arguments
@@ -70,11 +76,11 @@ docs:
 	rm -rf docs && cargo doc --target-dir docs --color never --no-deps --open --workspace --release
 
 audit:
-	cargo audit
-	cargo deny check
+	cargo install cargo-audit --features=fix --force
+# cargo deny check
 
 schema:
-	cargo schema --target-dir .
+	find ./packages -mindepth 1 -maxdepth 1 -type d -exec bash -c "(cd {} && cargo schema --target-dir .)" \;
 
-# test -> code-analizer -> security audit -> spellcheck -> api docs -> changelog -> schema -> format
-all: test clippy audit spellcheck docs changelog schema
+# test -> code-analizer -> security audit -> api docs -> changelog -> schema -> format
+all: test clippy audit coverage docs changelog schema

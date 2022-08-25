@@ -2,9 +2,8 @@ use std::env::current_dir;
 use std::fs::create_dir_all;
 
 // TODO: Rename all Messages so we can export them as Schemas
-use apollo_protocol::router::ExecuteMsg;
 use cosmwasm_schema::{export_schema, export_schema_with_title, remove_schemas, schema_for};
-use cw20_base::msg::{InstantiateMsg, QueryMsg};
+use cw20_base::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 
 fn main() {
     let mut out_dir = current_dir().unwrap();

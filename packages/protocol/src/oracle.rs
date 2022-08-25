@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::utils::query_supply;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum ExecuteMsg {
@@ -28,7 +28,7 @@ pub enum ExecuteMsg {
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum QueryMsg {
@@ -53,50 +53,50 @@ pub enum QueryMsg {
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct MigrateMsg {}
 
 // We define a custom struct for each query response
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct ConfigResponse {
     pub owner: String,
     pub base_asset: String,
 }
 
 // We define a custom struct for each query response
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct FeedersResponse {
     pub asset: String,
     pub feeders: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct PriceResponse {
     pub rate: Decimal256,
     pub last_updated_base: u64,
     pub last_updated_quote: u64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct PricesResponseElem {
     pub asset: String,
     pub price: Decimal256,
     pub last_updated_time: u64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct PricesResponse {
     pub prices: Vec<PricesResponseElem>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct PriceInfo {
     pub value: Decimal256,
     pub last_updated_time: u64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct Config {
     pub owner: Addr,
     pub base_asset: String,
@@ -110,13 +110,9 @@ pub fn query_config(querier: &QuerierWrapper, oracle: &Addr) -> StdResult<Config
     CONFIG.query(querier, oracle.clone())
 }
 
-pub fn query_price(
-    querier: &QuerierWrapper,
-    oracle: &Addr,
-    quote: &String,
-) -> StdResult<PriceInfo> {
+pub fn query_price(querier: &QuerierWrapper, oracle: &Addr, quote: &str) -> StdResult<PriceInfo> {
     PRICES
-        .query(querier, oracle.clone(), quote.as_str())?
+        .query(querier, oracle.clone(), quote)?
         .ok_or_else(|| StdError::generic_err("No price data for the specified asset exist"))
 }
 
@@ -181,7 +177,7 @@ pub fn calculate_lp_price(
     //Calculate the LP token price
     //Use Alpha Finance "Fair LP token pricing": https://blog.alphafinance.io/fair-lp-token-pricing/
     let pool_asset0_balance = asset0.query_balance(querier, pair.clone())?;
-    let pool_asset1_balance = asset1.query_balance(querier, pair.clone())?;
+    let pool_asset1_balance = asset1.query_balance(querier, pair)?;
 
     //Convert from cosmwasm_std Uint256 to cosmwasm_bignumber Uint256... :(
     //TODO: Make PR for cosmwasm_std to have ops::Mul, ops::Div, and rounding so we can just use that instead

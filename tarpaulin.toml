@@ -1,0 +1,14 @@
+[all]
+exclude-files=[
+    "bench/*",
+    "src/lib.rs",
+    "test/**/*",
+    "mod.rs"
+]
+fail-under=0
+no-fail-fast=true
+skip-clean=false
+
+[report]
+coveralls = "apollo"
+out = ["Html", "Xml"]

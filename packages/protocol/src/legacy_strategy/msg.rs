@@ -15,7 +15,7 @@ pub enum StrategyExecuteMsg {
     ZapOut { user_addr: String, amount: Uint128 },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum StrategyQueryMsg {
@@ -27,7 +27,7 @@ pub enum StrategyQueryMsg {
     Apr {},
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // config struct stored in / read from cw_4626 storage
 pub struct StrategyConfig<C> {
@@ -39,7 +39,7 @@ pub struct StrategyConfig<C> {
     pub strategy_config: C,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // config struct stored in / read from cw_4626 storage
 pub struct BaseStrategyConfig {
@@ -50,7 +50,7 @@ pub struct BaseStrategyConfig {
     pub performance_fee: Decimal,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // config struct returned by queries
 pub struct StrategyConfigResponse<C> {
@@ -63,7 +63,7 @@ pub struct StrategyConfigResponse<C> {
     pub strategy_config: C, // strategy implementation specific config
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // config struct used as input to update config
 pub struct StrategyConfigOptions<C> {
@@ -72,7 +72,7 @@ pub struct StrategyConfigOptions<C> {
     pub strategy_config: C,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // strategy info struct stored in / read from cw_4626 storage
 pub struct StrategyInfo {
@@ -81,7 +81,7 @@ pub struct StrategyInfo {
     pub total_shares: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // user info struct stored in / read from cw_4626 storage
 pub struct UserInfo {
@@ -89,7 +89,7 @@ pub struct UserInfo {
     pub shares: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 // user info struct returned by queries
 pub struct StrategyUserInfoResponse {
@@ -97,25 +97,25 @@ pub struct StrategyUserInfoResponse {
     pub shares: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct ShouldExecuteResponse {
     pub should_execute: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema, Default)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema, Default)]
 #[schemars(deny_unknown_fields)]
 pub struct TvlResponse {
     pub tvl: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct AprResponse {
     pub apr: Decimal256,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum StrategyCw20HookMsg {

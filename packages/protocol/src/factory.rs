@@ -17,12 +17,12 @@ pub fn next_dex_id(store: &mut dyn Storage) -> StdResult<u8> {
 
 pub fn add_dex(storage: &mut dyn Storage, dex_addr: &Addr) -> StdResult<u8> {
     let id = next_dex_id(storage)?;
-    APOLLO_DEX_ADAPTORS.save(storage, id.into(), dex_addr)?;
+    APOLLO_DEX_ADAPTORS.save(storage, id, dex_addr)?;
     Ok(id)
 }
 
 pub fn remove_dex(storage: &mut dyn Storage, dex_id: u8) -> StdResult<()> {
-    APOLLO_DEX_ADAPTORS.remove(storage, dex_id.into());
+    APOLLO_DEX_ADAPTORS.remove(storage, dex_id);
     Ok(())
 }
 
@@ -94,7 +94,7 @@ pub enum ExecuteMsg {
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum QueryMsg {
@@ -121,27 +121,27 @@ pub enum QueryMsg {
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct FactoryConfig {
     pub owner: Addr,
     pub warchest: Addr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct ApolloContracts {
     pub oracle: Addr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct ApolloContractsResponse {
     pub contracts: ApolloContracts,
     pub dex_adaptors: Vec<(u8, Addr)>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct FactoryStrategyInfoResponse {
     pub id: u64,
@@ -158,13 +158,13 @@ pub struct FactoryStrategyInfoResponse {
     pub strategy_token: Option<Addr>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct GetStrategiesResponse {
     pub strategies: Vec<FactoryStrategyInfoResponse>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct FactoryUserInfoResponse {
     pub id: u64,
@@ -172,39 +172,39 @@ pub struct FactoryUserInfoResponse {
     pub shares: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct GetUserStrategiesResponse {
     pub strategies: Vec<FactoryUserInfoResponse>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct GetConfigResponse {
     pub owner: Addr,
     pub warchest: Addr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct GetTvlResponse {
     pub tvl: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 #[schemars(deny_unknown_fields)]
 pub enum Cw20HookMsg {
     Deposit { strategy_id: u64 },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct StakerInfoResponse {
     pub staker: String,
     pub bond_amount: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct FactoryStrategyConfig {
     //Strategies must have these three fields in their config, other fields are allowed.
@@ -213,7 +213,7 @@ pub struct FactoryStrategyConfig {
 }
 
 // TODO - used for backward compatibility, remove after migration to v2
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct FactoryStrategyConfigResponse {
     pub config: FactoryStrategyConfig,

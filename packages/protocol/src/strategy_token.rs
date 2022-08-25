@@ -10,6 +10,6 @@ pub struct InstantiateMsg {
 }
 
 /// Allow Migration
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct MigrateMsg {}
