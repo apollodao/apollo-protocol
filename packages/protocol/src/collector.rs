@@ -1,10 +1,8 @@
 use apollo_asset::asset::Asset;
-use cosmwasm_std::{Addr, Decimal};
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
+use cosmwasm_schema::{cw_serde, QueryResponses};
+use cosmwasm_std::{ Addr, Decimal };
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct InstantiateMsg {
     pub owner: String,
     pub distribution_contract: String, //Warchest contract
@@ -16,9 +14,7 @@ pub struct InstantiateMsg {
     pub anchor_market: String, //Anchor MoneyMarket Market contract
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub enum ExecuteMsg {
     Deposit {},
     Distribute {},
@@ -34,15 +30,14 @@ pub enum ExecuteMsg {
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
+#[derive(QueryResponses)]
 pub enum QueryMsg {
+    #[returns(ConfigResponse)]
     Config {},
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct ConfigResponse {
     pub owner: Addr,
     pub distribution_contract: Addr,
@@ -55,8 +50,7 @@ pub struct ConfigResponse {
     pub anchor_market: Addr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct MigrateMsg {
     pub target_assets: Vec<Asset>,
 }

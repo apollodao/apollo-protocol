@@ -1,11 +1,8 @@
 use apollo_asset::asset::AssetInfo;
+use cosmwasm_schema::cw_serde;
 use cosmwasm_std::{Decimal, Uint128};
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub enum VaultExecuteMsg {
     ProvideLiquidity {
         base_token_balance_before: Option<Uint128>,
@@ -57,13 +54,13 @@ pub enum VaultExecuteMsg {
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct RewardInfoResponse<C> {
     pub staker_addr: String,
     pub reward_infos: Vec<RewardInfoResponseItem<C>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct RewardInfoResponseItem<C> {
     pub bond_amount: Uint128,
     pub pending_reward: Uint128,

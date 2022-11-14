@@ -1,11 +1,10 @@
-use crate::asset::{Asset, AssetInfo};
-use cosmwasm_std::{Addr, QuerierWrapper, StdResult};
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
+use crate::asset::{ Asset, AssetInfo };
+use cosmwasm_schema::cw_serde;
+use cosmwasm_std::{ Addr, QuerierWrapper, StdResult };
 
 /// ## Description
 /// This structure describes the main controls configs of pair
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct PairInfo {
     /// asset infos of assets in pair, available in [`AssetInfo`]
     pub asset_infos: [AssetInfo; 2],
@@ -29,7 +28,7 @@ impl PairInfo {
     pub fn query_pools(
         &self,
         querier: &QuerierWrapper,
-        contract_addr: Addr,
+        contract_addr: Addr
     ) -> StdResult<[Asset; 2]> {
         Ok([
             Asset {
@@ -46,8 +45,7 @@ impl PairInfo {
 
 /// ## Description
 /// This structure describes Pair types
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
+#[cw_serde]
 pub enum PairType {
     /// XYK pair type
     Xyk {},

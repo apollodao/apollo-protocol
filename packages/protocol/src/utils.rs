@@ -302,6 +302,7 @@ pub fn query_token_balance(
 }
 
 /// Send tokens
+#[allow(unreachable_patterns)]
 pub fn execute_send_tokens<D: CustomQuery, T>(
     deps: DepsMut<D>,
     env: Env,
@@ -342,6 +343,10 @@ pub fn execute_send_tokens<D: CustomQuery, T>(
                 funds,
             }),
             AssetInfo::Cw1155(_, _) => unimplemented!(),
+            cw_asset::AssetInfoBase::Native(_) => unimplemented!(),
+            cw_asset::AssetInfoBase::Cw20(_) => unimplemented!(),
+            cw_asset::AssetInfoBase::Cw1155(_, _) => unimplemented!(),
+            _ => unimplemented!(),
         },
         None => CosmosMsg::Bank(BankMsg::Send {
             to_address: recipient.to_string(),
@@ -440,6 +445,7 @@ pub fn validate_distribution_schedule(
 ///     query_balance(&deps.querier, asset_info, account_addr)
 /// }
 /// ```
+#[allow(unreachable_patterns)]
 pub fn query_balance<T: Into<String>, Q: CustomQuery>(
     querier: &QuerierWrapper<Q>,
     asset_info: &AssetInfo,
@@ -465,5 +471,9 @@ pub fn query_balance<T: Into<String>, Q: CustomQuery>(
             Ok(response.amount.amount)
         }
         AssetInfo::Cw1155(_, _) => unimplemented!(),
+        cw_asset::AssetInfoBase::Native(_) => unimplemented!(),
+        cw_asset::AssetInfoBase::Cw20(_) => unimplemented!(),
+        cw_asset::AssetInfoBase::Cw1155(_, _) => unimplemented!(),
+        _ => unimplemented!(),
     }
 }

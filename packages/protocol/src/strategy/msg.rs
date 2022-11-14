@@ -1,13 +1,10 @@
-use apollo_asset::asset::{Asset, AssetInfo};
-use cosmwasm_std::{Addr, Decimal, Decimal256, Uint128};
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
+use apollo_asset::asset::{ Asset, AssetInfo };
+use cosmwasm_schema::cw_serde;
+use cosmwasm_std::{ Addr, Decimal, Decimal256, Uint128 };
 
 pub type QueryMsg = BaseStrategyQueryMsg<()>;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub enum BaseStrategyQueryMsg<S> {
     UserInfo {
         address: String,
@@ -25,16 +22,14 @@ pub enum BaseStrategyQueryMsg<S> {
     Strategy(S),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct StrategyInfo {
     pub total_bond_amount: Uint128,
     pub total_shares: Uint128,
     pub global_index: Decimal, // TODO - remove this after migration, legacy
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 // user info struct returned by queries
 pub struct UserInfo {
     pub base_token_balance: Uint128,
@@ -42,34 +37,29 @@ pub struct UserInfo {
     pub index: Decimal, // TODO - remove this after migration, legacy
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct ShouldExecuteResponse {
     pub should_execute: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct TvlResponse {
     pub tvl: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct AprResponse {
     pub apr: Decimal256,
 }
 
 // TODO - move these to a proxy folder
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct PendingRewardsResponse {
     pub pending_rewards: Vec<PendingRewardsItem>,
     pub total_value: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct PendingRewardsItem {
     pub reward_token: Asset,
     pub value: Uint128,
@@ -78,9 +68,7 @@ pub struct PendingRewardsItem {
 pub type ExecuteMsg = BaseStrategyExecuteMsg<()>;
 
 // TODO: Switch to using Addr
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub enum BaseStrategyExecuteMsg<S> {
     ExecuteStrategy {
         executor: Option<String>, // recipient for execution fee (defaults to sender)
@@ -89,8 +77,7 @@ pub enum BaseStrategyExecuteMsg<S> {
     Strategy(S),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct InstantiateMsg {
     pub base_denom: AssetInfo,
     pub apollo_factory: String, //The Apollo Factory contract

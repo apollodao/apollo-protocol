@@ -1,16 +1,15 @@
 use crate::querier::{query_balance, query_token_balance, query_token_symbol};
 use apollo_proto_rust::cosmos::base::v1beta1::Coin as ProtoCoin;
+use cosmwasm_schema::cw_serde;
 use cosmwasm_std::{
     Addr, Api, Coin, CustomQuery, MessageInfo, QuerierWrapper, StdError, StdResult, Uint128,
 };
 use cw_storage_plus::Map;
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
 use std::{convert::TryInto, fmt, str::FromStr};
 
 /// ## Description
 /// This enum describes asset.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct Asset {
     /// the available type of asset from [`AssetInfo`]
     pub info: AssetInfo,
@@ -167,8 +166,7 @@ impl Asset {
 /// Token { contract_addr: Addr::unchecked("terra...") };
 /// NativeToken { denom: String::from("uluna") };
 /// ```
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema, PartialOrd)]
-#[serde(rename_all = "snake_case")]
+#[cw_serde]
 pub enum AssetInfo {
     /// Token
     Token {
