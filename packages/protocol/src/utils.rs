@@ -397,14 +397,14 @@ pub fn parse_contract_addr_from_instantiate_event(
 pub fn decimal256_to_decimal(decimal: Decimal256) -> StdResult<Decimal> {
     let atomics: Uint128 = decimal.atomics().try_into()?;
     Decimal::from_atomics(atomics, decimal.decimal_places())
-        .map_err(|e| StdError::generic_err(&format!("{:?}", e)))
+        .map_err(|e| StdError::generic_err(format!("{:?}", e)))
 }
 
 /// Decimal to Decimal256 conversion
 pub fn decimal_to_decimal256(decimal: Decimal) -> StdResult<Decimal256> {
     let atomics: Uint128 = decimal.atomics();
     Decimal256::from_atomics(atomics, decimal.decimal_places())
-        .map_err(|e| StdError::generic_err(&format!("{:?}", e)))
+        .map_err(|e| StdError::generic_err(format!("{:?}", e)))
 }
 
 /// Scheduling validation
