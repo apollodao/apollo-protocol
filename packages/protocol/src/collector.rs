@@ -1,6 +1,6 @@
 use apollo_asset::asset::Asset;
 use cosmwasm_schema::{cw_serde, QueryResponses};
-use cosmwasm_std::{ Addr, Decimal };
+use cosmwasm_std::{Addr, Decimal};
 
 #[cw_serde]
 pub struct InstantiateMsg {

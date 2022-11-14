@@ -1,7 +1,7 @@
-use cosmwasm_schema::{ cw_serde, QueryResponses };
-use cosmwasm_std::{ Addr, Binary, Decimal, Order, StdError, StdResult, Storage, Uint128 };
+use cosmwasm_schema::{cw_serde, QueryResponses};
+use cosmwasm_std::{Addr, Binary, Decimal, Order, StdError, StdResult, Storage, Uint128};
 use cw20::Cw20ReceiveMsg;
-use cw_storage_plus::{ Item, Map };
+use cw_storage_plus::{Item, Map};
 
 use crate::collector::ConfigResponse;
 
@@ -29,19 +29,16 @@ pub fn remove_dex(storage: &mut dyn Storage, dex_id: u8) -> StdResult<()> {
 
 pub fn get_apollo_dex_adaptor_by_addr(
     storage: &dyn Storage,
-    dex_adaptor_addr: &Addr
+    dex_adaptor_addr: &Addr,
 ) -> StdResult<Addr> {
-    match
-        APOLLO_DEX_ADAPTORS.range(storage, None, None, Order::Ascending).find(
-            |p| &p.as_ref().unwrap().1 == dex_adaptor_addr
-        )
+    match APOLLO_DEX_ADAPTORS
+        .range(storage, None, None, Order::Ascending)
+        .find(|p| &p.as_ref().unwrap().1 == dex_adaptor_addr)
     {
-        None =>
-            Err(
-                StdError::generic_err(
-                    format!("dex adaptor not whitelisted with factory - {:?}", dex_adaptor_addr)
-                )
-            ),
+        None => Err(StdError::generic_err(format!(
+            "dex adaptor not whitelisted with factory - {:?}",
+            dex_adaptor_addr
+        ))),
         Some(found) => Ok(found?.1),
     }
 }
@@ -107,9 +104,7 @@ pub enum QueryMsg {
     },
     #[returns(GetStrategiesResponse)]
     /// GetStrategy
-    GetStrategy {
-        id: u64,
-    },
+    GetStrategy { id: u64 },
     #[returns(Vec<GetUserStrategiesResponse>)]
     /// GetUserStrategies
     GetUserStrategies {
@@ -123,18 +118,13 @@ pub enum QueryMsg {
     GetConfig {},
     #[returns(Decimal)]
     /// GetStrategyTvl
-    GetStrategyTvl {
-        id: u64,
-    },
+    GetStrategyTvl { id: u64 },
     #[returns(Decimal)]
     /// GetTotalTvl
     GetTotalTvl {},
     #[returns(StakerInfoResponse)]
     /// GetStakerInfo
-    GetStakerInfo {
-        staker: String,
-        strategy_id: u64,
-    },
+    GetStakerInfo { staker: String, strategy_id: u64 },
 }
 
 #[cw_serde]
@@ -200,9 +190,7 @@ pub struct GetTvlResponse {
 
 #[cw_serde]
 pub enum Cw20HookMsg {
-    Deposit {
-        strategy_id: u64,
-    },
+    Deposit { strategy_id: u64 },
 }
 
 #[cw_serde]

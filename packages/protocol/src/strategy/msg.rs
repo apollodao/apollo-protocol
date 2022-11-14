@@ -1,6 +1,6 @@
-use apollo_asset::asset::{ Asset, AssetInfo };
+use apollo_asset::asset::{Asset, AssetInfo};
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{ Addr, Decimal, Decimal256, Uint128 };
+use cosmwasm_std::{Addr, Decimal, Decimal256, Uint128};
 
 pub type QueryMsg = BaseStrategyQueryMsg<()>;
 

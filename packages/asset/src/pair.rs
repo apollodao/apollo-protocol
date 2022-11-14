@@ -1,6 +1,6 @@
-use crate::asset::{ Asset, AssetInfo };
+use crate::asset::{Asset, AssetInfo};
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{ Addr, QuerierWrapper, StdResult };
+use cosmwasm_std::{Addr, QuerierWrapper, StdResult};
 
 /// ## Description
 /// This structure describes the main controls configs of pair
@@ -28,7 +28,7 @@ impl PairInfo {
     pub fn query_pools(
         &self,
         querier: &QuerierWrapper,
-        contract_addr: Addr
+        contract_addr: Addr,
     ) -> StdResult<[Asset; 2]> {
         Ok([
             Asset {

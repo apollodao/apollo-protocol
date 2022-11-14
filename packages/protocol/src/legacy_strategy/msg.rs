@@ -1,5 +1,5 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
-use cosmwasm_std::{ Addr, CanonicalAddr, Decimal, Decimal256, Uint128 };
+use cosmwasm_std::{Addr, CanonicalAddr, Decimal, Decimal256, Uint128};
 use cw20::Cw20ReceiveMsg;
 
 use crate::oracle::Config;
@@ -8,20 +8,10 @@ use crate::oracle::Config;
 pub enum StrategyExecuteMsg {
     Receive(Cw20ReceiveMsg),
     Execute {},
-    Withdraw {
-        user_addr: String,
-        amount: Uint128,
-    },
-    EmergencyWithdraw {
-        receiver: String,
-    },
-    ZapIn {
-        depositor_addr: String,
-    },
-    ZapOut {
-        user_addr: String,
-        amount: Uint128,
-    },
+    Withdraw { user_addr: String, amount: Uint128 },
+    EmergencyWithdraw { receiver: String },
+    ZapIn { depositor_addr: String },
+    ZapOut { user_addr: String, amount: Uint128 },
 }
 
 #[cw_serde]
@@ -29,9 +19,7 @@ pub enum StrategyExecuteMsg {
 pub enum StrategyQueryMsg {
     #[returns(UserInfo)]
     /// UserInfo
-    UserInfo {
-        address: String,
-    },
+    UserInfo { address: String },
     #[returns(StrategyUserInfoResponse)]
     /// StrategyInfo
     StrategyInfo {},
@@ -40,9 +28,7 @@ pub enum StrategyQueryMsg {
     Config {},
     #[returns(ShouldExecuteResponse)]
     /// ShouldExecute
-    ShouldExecute {
-        cost: Uint128,
-    },
+    ShouldExecute { cost: Uint128 },
     #[returns(TvlResponse)]
     /// Tvl
     Tvl {},
@@ -131,7 +117,5 @@ pub struct AprResponse {
 
 #[cw_serde]
 pub enum StrategyCw20HookMsg {
-    Deposit {
-        depositor_addr: String,
-    },
+    Deposit { depositor_addr: String },
 }

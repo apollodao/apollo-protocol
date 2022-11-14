@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
 use apollo_asset::asset::AssetInfo;
-use cosmwasm_schema::{ cw_serde, QueryResponses };
-use cosmwasm_std::{ Addr, Api, Decimal256, QuerierWrapper, StdError, StdResult, Uint256 };
-use cw_storage_plus::{ Item, Map };
+use cosmwasm_schema::{cw_serde, QueryResponses};
+use cosmwasm_std::{Addr, Api, Decimal256, QuerierWrapper, StdError, StdResult, Uint256};
+use cw_storage_plus::{Item, Map};
 
 use crate::utils::query_supply;
 
@@ -33,15 +33,10 @@ pub enum QueryMsg {
     Config {},
     #[returns(FeedersResponse)]
     /// Feeders
-    Feeders {
-        asset: String,
-    },
+    Feeders { asset: String },
     #[returns(PriceResponse)]
     /// Price
-    Price {
-        base: String,
-        quote: String,
-    },
+    Price { base: String, quote: String },
     #[returns(PriceResponse)]
     /// LpPrice
     // TODO: Check this response
@@ -117,9 +112,9 @@ pub fn query_config(querier: &QuerierWrapper, oracle: &Addr) -> StdResult<Config
 }
 
 pub fn query_price(querier: &QuerierWrapper, oracle: &Addr, quote: &str) -> StdResult<PriceInfo> {
-    PRICES.query(querier, oracle.clone(), quote)?.ok_or_else(||
-        StdError::generic_err("No price data for the specified asset exist")
-    )
+    PRICES
+        .query(querier, oracle.clone(), quote)?
+        .ok_or_else(|| StdError::generic_err("No price data for the specified asset exist"))
 }
 
 pub fn query_oracle_price(
@@ -127,7 +122,7 @@ pub fn query_oracle_price(
     oracle: Addr,
     base: String,
     quote: String,
-    oldest_acceptable_price: Option<u64>
+    oldest_acceptable_price: Option<u64>,
 ) -> StdResult<Decimal256> {
     let config = query_config(querier, &oracle)?;
 
@@ -153,9 +148,15 @@ pub fn query_oracle_price(
 
     if let Some(age_limit) = oldest_acceptable_price {
         if quote_price.last_updated_time < age_limit {
-            Err(StdError::generic_err(format!("Oracle quote price too old - {}", quote)))
+            Err(StdError::generic_err(format!(
+                "Oracle quote price too old - {}",
+                quote
+            )))
         } else if base_price.last_updated_time < age_limit {
-            Err(StdError::generic_err(format!("Oracle base price too old - {}", base)))
+            Err(StdError::generic_err(format!(
+                "Oracle base price too old - {}",
+                base
+            )))
         } else {
             Ok(rate)
         }
@@ -172,7 +173,7 @@ pub fn calculate_lp_price(
     asset0_price: Decimal256,
     asset1_price: Decimal256,
     pair: Addr,
-    lp_token: Addr
+    lp_token: Addr,
 ) -> StdResult<Decimal256> {
     //Calculate the LP token price
     //Use Alpha Finance "Fair LP token pricing": https://blog.alphafinance.io/fair-lp-token-pricing/
@@ -182,17 +183,15 @@ pub fn calculate_lp_price(
     //Convert from cosmwasm_std Uint256 to cosmwasm_bignumber Uint256... :(
     //TODO: Make PR for cosmwasm_std to have ops::Mul, ops::Div, and rounding so we can just use that instead
     let constant_product = Uint256::from_str(
-        &pool_asset0_balance.full_mul(pool_asset1_balance).to_string()
+        &pool_asset0_balance
+            .full_mul(pool_asset1_balance)
+            .to_string(),
     )?;
     let lp_token_supply = query_supply(querier, lp_token)?;
-    let lp_token_price =
-        (Decimal256::from_ratio(2u8, 1u8) *
-            (
-                asset0_price *
-                asset1_price *
-                Decimal256::from_atomics(constant_product, 18).unwrap()
-            ).sqrt()) /
-        Decimal256::from_atomics(lp_token_supply, 18).unwrap();
+    let lp_token_price = (Decimal256::from_ratio(2u8, 1u8)
+        * (asset0_price * asset1_price * Decimal256::from_atomics(constant_product, 18).unwrap())
+            .sqrt())
+        / Decimal256::from_atomics(lp_token_supply, 18).unwrap();
 
     Ok(lp_token_price)
 }
@@ -206,7 +205,7 @@ pub fn query_oracle_lp_price(
     asset1: AssetInfo,
     pair: Addr,
     lp_token: Addr,
-    oldest_acceptable_price: Option<u64>
+    oldest_acceptable_price: Option<u64>,
 ) -> StdResult<Decimal256> {
     //Fetch the quote token price
 
@@ -215,15 +214,24 @@ pub fn query_oracle_lp_price(
         oracle.clone(),
         base.clone(),
         asset0.to_string(),
-        oldest_acceptable_price
+        oldest_acceptable_price,
     )?;
     let asset1_price = query_oracle_price(
         querier,
         oracle,
         base,
         asset1.to_string(),
-        oldest_acceptable_price
+        oldest_acceptable_price,
     )?;
 
-    calculate_lp_price(querier, api, asset0, asset1, asset0_price, asset1_price, pair, lp_token)
+    calculate_lp_price(
+        querier,
+        api,
+        asset0,
+        asset1,
+        asset0_price,
+        asset1_price,
+        pair,
+        lp_token,
+    )
 }
