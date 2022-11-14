@@ -1,13 +1,11 @@
 use crate::legacy_strategy::msg::StrategyConfigOptions;
 use crate::legacy_vault::msg::VaultExecuteMsg;
 use apollo_asset::asset::AssetInfo;
+use cosmwasm_schema::cw_serde;
 use cosmwasm_std::{Addr, CanonicalAddr, Decimal, Uint128};
 use cw20::Cw20ReceiveMsg;
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct AutoCompoundInstantiateMsg {
     pub apollo_factory: String,        //The Apollo Factory contract
     pub staking_contract: String,      //The Mirror staking contract
@@ -27,9 +25,7 @@ pub struct AutoCompoundInstantiateMsg {
     pub terraswap_router: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub enum AutoCompoundExecuteMsg {
     Receive(Cw20ReceiveMsg),
     Execute {},
@@ -58,16 +54,14 @@ pub enum AutoCompoundExecuteMsg {
     Vault(VaultExecuteMsg),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct AutoCompoundMigrateMsg {
     pub oracle_contract: String,
     pub farm_factory_contract: String,
     pub terraswap_router: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 // config struct stored in / read from cw_4626 storage
 pub struct AutoCompoundConfig {
     pub asset_token: AssetInfo, // X token in X-Y pair
@@ -85,8 +79,7 @@ pub struct AutoCompoundConfig {
     pub farm_factory_contract: CanonicalAddr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 // used in response from config query
 pub struct AutoCompoundConfigResponse {
     pub asset_token: AssetInfo,
@@ -104,8 +97,7 @@ pub struct AutoCompoundConfigResponse {
     pub farm_factory_contract: Addr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 // used as input to update config
 pub struct AutoCompoundConfigOptions {
     pub asset_token: Option<String>,

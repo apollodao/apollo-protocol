@@ -1,8 +1,9 @@
+use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Addr, Binary, Decimal, Order, StdError, StdResult, Storage, Uint128};
 use cw20::Cw20ReceiveMsg;
 use cw_storage_plus::{Item, Map};
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
+
+use crate::collector::ConfigResponse;
 
 pub static APOLLO_CONTRACTS: Item<ApolloContracts> = Item::new("apollo_contracts");
 pub static APOLLO_DEX_ADAPTORS: Map<u8, Addr> = Map::new("apollo_dex_adaptors");
@@ -42,9 +43,7 @@ pub fn get_apollo_dex_adaptor_by_addr(
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub enum ExecuteMsg {
     AddStrategy {
         strategy: String,
@@ -94,55 +93,58 @@ pub enum ExecuteMsg {
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
+#[derive(QueryResponses)]
 pub enum QueryMsg {
+    #[returns(Vec<GetStrategiesResponse>)]
+    /// GetStrategies
     GetStrategies {
         limit: Option<u32>,
         start_from: Option<u64>,
     },
-    GetStrategy {
-        id: u64,
-    },
+    #[returns(GetStrategiesResponse)]
+    /// GetStrategy
+    GetStrategy { id: u64 },
+    #[returns(Vec<GetUserStrategiesResponse>)]
+    /// GetUserStrategies
     GetUserStrategies {
         user: String,
         limit: Option<u32>,
         start_from: Option<u64>,
     },
+    // TODO: check this
+    #[returns(ConfigResponse)]
+    /// GetUserStrategies
     GetConfig {},
-    GetStrategyTvl {
-        id: u64,
-    },
+    #[returns(Decimal)]
+    /// GetStrategyTvl
+    GetStrategyTvl { id: u64 },
+    #[returns(Decimal)]
+    /// GetTotalTvl
     GetTotalTvl {},
-    GetStakerInfo {
-        staker: String,
-        strategy_id: u64,
-    },
+    #[returns(StakerInfoResponse)]
+    /// GetStakerInfo
+    GetStakerInfo { staker: String, strategy_id: u64 },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct FactoryConfig {
     pub owner: Addr,
     pub warchest: Addr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct ApolloContracts {
     pub oracle: Addr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct ApolloContractsResponse {
     pub contracts: ApolloContracts,
     pub dex_adaptors: Vec<(u8, Addr)>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct FactoryStrategyInfoResponse {
     pub id: u64,
     pub address: Addr,
@@ -158,54 +160,46 @@ pub struct FactoryStrategyInfoResponse {
     pub strategy_token: Option<Addr>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct GetStrategiesResponse {
     pub strategies: Vec<FactoryStrategyInfoResponse>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct FactoryUserInfoResponse {
     pub id: u64,
     pub base_token_balance: Uint128,
     pub shares: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct GetUserStrategiesResponse {
     pub strategies: Vec<FactoryUserInfoResponse>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct GetConfigResponse {
     pub owner: Addr,
     pub warchest: Addr,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct GetTvlResponse {
     pub tvl: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub enum Cw20HookMsg {
     Deposit { strategy_id: u64 },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct StakerInfoResponse {
     pub staker: String,
     pub bond_amount: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct FactoryStrategyConfig {
     //Strategies must have these three fields in their config, other fields are allowed.
     pub base_token: Addr,
@@ -213,8 +207,7 @@ pub struct FactoryStrategyConfig {
 }
 
 // TODO - used for backward compatibility, remove after migration to v2
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct FactoryStrategyConfigResponse {
     pub config: FactoryStrategyConfig,
 }

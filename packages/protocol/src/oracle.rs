@@ -1,16 +1,13 @@
 use std::str::FromStr;
 
 use apollo_asset::asset::AssetInfo;
+use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Addr, Api, Decimal256, QuerierWrapper, StdError, StdResult, Uint256};
 use cw_storage_plus::{Item, Map};
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
 
 use crate::utils::query_supply;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub enum ExecuteMsg {
     UpdateConfig {
         owner: Option<String>,
@@ -28,18 +25,21 @@ pub enum ExecuteMsg {
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
+#[derive(QueryResponses)]
 pub enum QueryMsg {
+    #[returns(ConfigResponse)]
+    /// Config
     Config {},
-    Feeders {
-        asset: String,
-    },
-    Price {
-        base: String,
-        quote: String,
-    },
+    #[returns(FeedersResponse)]
+    /// Feeders
+    Feeders { asset: String },
+    #[returns(PriceResponse)]
+    /// Price
+    Price { base: String, quote: String },
+    #[returns(PriceResponse)]
+    /// LpPrice
+    // TODO: Check this response
     LpPrice {
         base: String,
         asset0: AssetInfo,
@@ -47,56 +47,57 @@ pub enum QueryMsg {
         pair: String,
         lp_token: String,
     },
+    #[returns(PricesResponse)]
+    /// Prices
     Prices {
         start_after: Option<String>,
         limit: Option<u32>,
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct MigrateMsg {}
 
 // We define a custom struct for each query response
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct ConfigResponse {
     pub owner: String,
     pub base_asset: String,
 }
 
 // We define a custom struct for each query response
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct FeedersResponse {
     pub asset: String,
     pub feeders: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct PriceResponse {
     pub rate: Decimal256,
     pub last_updated_base: u64,
     pub last_updated_quote: u64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct PricesResponseElem {
     pub asset: String,
     pub price: Decimal256,
     pub last_updated_time: u64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct PricesResponse {
     pub prices: Vec<PricesResponseElem>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct PriceInfo {
     pub value: Decimal256,
     pub last_updated_time: u64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct Config {
     pub owner: Addr,
     pub base_asset: String,
@@ -187,9 +188,9 @@ pub fn calculate_lp_price(
             .to_string(),
     )?;
     let lp_token_supply = query_supply(querier, lp_token)?;
-    let lp_token_price = Decimal256::from_ratio(2u8, 1u8)
+    let lp_token_price = (Decimal256::from_ratio(2u8, 1u8)
         * (asset0_price * asset1_price * Decimal256::from_atomics(constant_product, 18).unwrap())
-            .sqrt()
+            .sqrt())
         / Decimal256::from_atomics(lp_token_supply, 18).unwrap();
 
     Ok(lp_token_price)

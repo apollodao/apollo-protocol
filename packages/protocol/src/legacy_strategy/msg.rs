@@ -1,11 +1,10 @@
+use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Addr, CanonicalAddr, Decimal, Decimal256, Uint128};
 use cw20::Cw20ReceiveMsg;
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+use crate::oracle::Config;
+
+#[cw_serde]
 pub enum StrategyExecuteMsg {
     Receive(Cw20ReceiveMsg),
     Execute {},
@@ -15,20 +14,30 @@ pub enum StrategyExecuteMsg {
     ZapOut { user_addr: String, amount: Uint128 },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
+#[derive(QueryResponses)]
 pub enum StrategyQueryMsg {
+    #[returns(UserInfo)]
+    /// UserInfo
     UserInfo { address: String },
+    #[returns(StrategyUserInfoResponse)]
+    /// StrategyInfo
     StrategyInfo {},
+    #[returns(Config)]
+    /// Config
     Config {},
+    #[returns(ShouldExecuteResponse)]
+    /// ShouldExecute
     ShouldExecute { cost: Uint128 },
+    #[returns(TvlResponse)]
+    /// Tvl
     Tvl {},
+    #[returns(AprResponse)]
+    /// Apr
     Apr {},
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 // config struct stored in / read from cw_4626 storage
 pub struct StrategyConfig<C> {
     //Strategies must have these three fields in their config, other fields are allowed.
@@ -39,8 +48,7 @@ pub struct StrategyConfig<C> {
     pub strategy_config: C,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 // config struct stored in / read from cw_4626 storage
 pub struct BaseStrategyConfig {
     //Strategies must have these three fields in their config, other fields are allowed.
@@ -50,8 +58,7 @@ pub struct BaseStrategyConfig {
     pub performance_fee: Decimal,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 // config struct returned by queries
 pub struct StrategyConfigResponse<C> {
     pub apollo_factory: Addr,
@@ -63,8 +70,7 @@ pub struct StrategyConfigResponse<C> {
     pub strategy_config: C, // strategy implementation specific config
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 // config struct used as input to update config
 pub struct StrategyConfigOptions<C> {
     pub apollo_collector: Option<String>,
@@ -72,8 +78,7 @@ pub struct StrategyConfigOptions<C> {
     pub strategy_config: C,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 // strategy info struct stored in / read from cw_4626 storage
 pub struct StrategyInfo {
     pub global_index: Decimal,
@@ -81,43 +86,36 @@ pub struct StrategyInfo {
     pub total_shares: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 // user info struct stored in / read from cw_4626 storage
 pub struct UserInfo {
     pub index: Decimal,
     pub shares: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 // user info struct returned by queries
 pub struct StrategyUserInfoResponse {
     pub base_token_balance: Uint128,
     pub shares: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct ShouldExecuteResponse {
     pub should_execute: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema, Default)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct TvlResponse {
     pub tvl: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub struct AprResponse {
     pub apr: Decimal256,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-#[schemars(deny_unknown_fields)]
+#[cw_serde]
 pub enum StrategyCw20HookMsg {
     Deposit { depositor_addr: String },
 }
